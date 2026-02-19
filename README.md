@@ -14,25 +14,54 @@
 
 ---
 
-## 📸 Screenshots
+## 📸 Platform Screenshots
 
-> **Place your screenshots inside a `/screenshots` folder** and keep the same file names below.
+### 🔐 Login & Authentication Screen
+![Edu-Able Login](img/login.png)  
+*Secure login interface with OTP verification and accessibility mode selection.*
 
-### 🏠 Home & Mode Selection
-![Edu-Able Home](screenshots/home.png)  
-*Landing experience with inclusive learning mode selection.*
+---
 
-### 🧠 Dyslexia-Friendly Learning Mode
-![Dyslexia Mode](screenshots/dyslexia-mode.png)  
-*Readable typography, chunked reading, focus controls, and supportive UI.*
+### 🧏 Deaf Learning Mode
+![Deaf Mode](img/deaf.png)  
+*Accessible landing experience designed for deaf learners with visual-first navigation.*
 
-### 📝 Interactive Exam Engine
-![Exam Engine](screenshots/exam.png)  
-*Hands-free/accessible exam flow with score tracking.*
+---
+
+### 🦯 Blind Learning Mode
+![Blind Mode](img/blind.png)  
+*Screen-reader friendly layout with audio guidance and simplified interaction.*
+
+---
+
+### 🧠 Dyslexia Learning Mode
+![Dyslexia Mode](img/dyslexia.png)  
+*Readable typography, chunked reading, focus controls, and dyslexia-friendly UI.*
+
+---
 
 ### 👨‍👩‍👧 Parent Dashboard
-![Parent Dashboard](screenshots/dashboard.png)  
-*Progress visibility, performance snapshots, and exam history insights.*
+![Parent Dashboard](img/parents.png)  
+*Performance monitoring panel with progress tracking and learning insights.*
+
+---
+
+### ♿ Physical Handicap Support (Coming Soon)
+![Physical Handicap](img/comming.jpeg)  
+*Assistive interaction tools and adaptive controls for physically challenged students.*
+
+---
+
+### ⚡ ADHD Focus Mode (Coming Soon)
+![ADHD Mode](img/comming.jpeg)  
+*Distraction-reduced interface with guided learning and focus support tools.*
+
+---
+
+### 📝 Accessible Exam System
+![Exam System](img/exam.png)  
+*Hands-free accessible exam workflow with score tracking and performance analytics.*
+
 
 ---
 
