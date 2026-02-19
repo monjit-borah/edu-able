@@ -84,6 +84,37 @@ Most platforms assume one learning style. Edu-Able challenges that by delivering
 
 ---
 
+## 🧩 Platform Interfaces
+
+Edu-Able is designed as a fully inclusive learning platform with **seven primary learning and support interfaces**, each tailored for different accessibility needs. The system allows students and parents to choose the most suitable environment for comfortable and effective learning.
+
+The main interfaces include:
+
+1. **🧏 Deaf Interface**  
+   A visual-first learning environment designed for students with hearing impairments, focusing on readable content, structured layouts, and minimal reliance on audio instructions.
+
+2. **🦯 Blind Interface**  
+   A screen-reader-friendly interface with audio guidance, simplified navigation, and accessibility-optimized interaction to support visually impaired learners.
+
+3. **🧠 Dyslexia Interface**  
+   A dyslexia-friendly reading environment featuring accessible typography, chunked content, focus tools, and supportive layout structures to improve reading comprehension.
+
+4. **⚡ ADHD Interface**  
+   A distraction-reduced learning mode with simplified screens, guided steps, and structured study flow to help students maintain attention and focus.
+
+5. **👨‍👩‍👧 Parental Support Interface**  
+   A dedicated dashboard for parents to monitor student progress, performance, activity history, and learning insights.
+
+6. **📝 Exam Interface**  
+   An accessible examination system that allows students to attempt tests in a structured, supportive, and inclusive environment with result tracking.
+
+7. **♿ Physically Handicapped Interface**  
+   An adaptive interface supporting students with physical disabilities through simplified controls, assistive interaction options, and accessible navigation.
+
+Together, these seven interfaces ensure that Edu-Able provides an inclusive, student-friendly educational experience where learners with different abilities can study comfortably and effectively.
+
+---
+
 ## ✨ Core Features
 
 ### ♿ Accessibility Features
