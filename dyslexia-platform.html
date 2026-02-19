@@ -1,0 +1,610 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Dyslexia-Friendly Learning · CBSE Class 6</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    @font-face {
+      font-family: "OpenDyslexic";
+      src: url("https://cdn.jsdelivr.net/gh/antijingoist/open-dyslexic/web/OpenDyslexic-Regular.otf") format("opentype");
+      font-display: swap;
+    }
+
+    :root {
+      --bg: #f7f6ef;
+      --bg-soft: #eef5ff;
+      --panel: #ffffff;
+      --panel-2: #f2f8ff;
+      --text: #1f2f4a;
+      --muted: #627899;
+      --line: #cfdef1;
+      --blue: #5da8ff;
+      --green: #52c79d;
+      --orange: #f5b45b;
+      --red: #ef7676;
+      --radius-xl: 26px;
+      --radius-md: 16px;
+      --reader-size: 27px;
+      --reader-line: 2;
+      --reader-bg: #fffdf2;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: "Nunito", "Inter", system-ui, sans-serif;
+      color: var(--text);
+      background:
+        radial-gradient(900px 420px at 3% 0%, #dff0ff, transparent 60%),
+        radial-gradient(760px 380px at 100% 0%, #e9fff6, transparent 52%),
+        var(--bg);
+      min-height: 100vh;
+    }
+
+    body.dyslexic-font { font-family: "OpenDyslexic", "Nunito", sans-serif; }
+
+    .app-shell {
+      display: grid;
+      grid-template-columns: 250px 1fr;
+      min-height: 100vh;
+      gap: 14px;
+      padding: 14px;
+    }
+
+    .sidebar,
+    .main {
+      background: rgba(255, 255, 255, 0.85);
+      border: 1px solid rgba(255, 255, 255, 0.7);
+      box-shadow: 0 16px 34px rgba(81, 128, 169, 0.14);
+      border-radius: var(--radius-xl);
+      backdrop-filter: blur(8px);
+    }
+
+    .sidebar {
+      padding: 16px;
+      position: sticky;
+      top: 14px;
+      height: calc(100vh - 28px);
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+
+    .brand {
+      font-weight: 800;
+      font-size: 1.05rem;
+      padding: 8px 10px;
+      border-radius: 12px;
+      background: linear-gradient(130deg, #e9f3ff, #e4fbf1);
+      border: 1px solid var(--line);
+    }
+
+    .nav-btn {
+      border: 1px solid transparent;
+      border-radius: 12px;
+      background: transparent;
+      color: var(--text);
+      text-align: left;
+      padding: 11px 12px;
+      font-size: 1rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .nav-btn:hover, .nav-btn.active {
+      border-color: #b7d4f9;
+      background: #edf6ff;
+      transform: translateX(2px);
+    }
+
+    .toggle-group {
+      margin-top: auto;
+      display: grid;
+      gap: 8px;
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      padding: 10px;
+      background: #f8fbff;
+    }
+
+    .toggle-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      font-size: 0.9rem;
+      color: var(--muted);
+    }
+
+    .main { padding: 14px; }
+
+    .topbar {
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      padding: 14px;
+      background: linear-gradient(125deg, #eaf4ff, #edfdf5);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 12px;
+    }
+
+    .topbar h1 { font-size: clamp(1.1rem, 2vw, 1.55rem); }
+    .topbar p { color: var(--muted); font-size: 1rem; margin-top: 4px; }
+
+    [data-page] { display: grid; gap: 12px; }
+    [data-page][hidden] { display: none !important; }
+
+    .hero {
+      border-radius: var(--radius-xl);
+      border: 1px solid var(--line);
+      background: linear-gradient(130deg, #ffffff, #eef7ff);
+      padding: 20px;
+      display: grid;
+      gap: 12px;
+    }
+
+    .hero h2 { font-size: clamp(1.2rem, 2vw, 1.8rem); }
+    .hero p { color: var(--muted); max-width: 760px; font-size: 1.04rem; line-height: 1.75; }
+
+    .primary-btn,
+    .secondary-btn,
+    .option-btn {
+      border-radius: 14px;
+      border: 1px solid var(--line);
+      background: #fff;
+      color: var(--text);
+      font-weight: 800;
+      font-size: 1.04rem;
+      padding: 12px 16px;
+      cursor: pointer;
+      min-height: 48px;
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .primary-btn {
+      background: linear-gradient(120deg, #62abff, #6bcfa6);
+      color: white;
+      border: none;
+      box-shadow: 0 8px 20px rgba(91, 158, 220, 0.25);
+    }
+
+    .primary-btn:hover,
+    .secondary-btn:hover,
+    .option-btn:hover { transform: translateY(-1px); }
+
+    .subject-grid,
+    .stats-grid,
+    .panel-grid,
+    .dashboard-grid {
+      display: grid;
+      gap: 12px;
+    }
+
+    .subject-grid { grid-template-columns: repeat(4, minmax(160px, 1fr)); }
+
+    .subject-card {
+      border-radius: var(--radius-md);
+      border: 1px solid var(--line);
+      padding: 14px;
+      background: #fff;
+      text-align: left;
+      cursor: pointer;
+      min-height: 108px;
+    }
+
+    .subject-card h4 { font-size: 1rem; }
+    .subject-card p { color: var(--muted); margin-top: 6px; font-size: 1rem; }
+    .subject-card.locked { opacity: 0.68; cursor: not-allowed; }
+
+    .stats-grid { grid-template-columns: repeat(3, minmax(150px, 1fr)); }
+    .stats-grid article {
+      border-radius: var(--radius-md);
+      border: 1px solid var(--line);
+      background: #fff;
+      padding: 12px;
+    }
+    .stats-grid h3 { color: var(--blue); font-size: 1.4rem; }
+    .stats-grid p { color: var(--muted); font-size: 0.96rem; margin-top: 5px; }
+
+    .panel-grid { grid-template-columns: 240px 1fr; }
+
+    .subject-pills {
+      border: 1px solid var(--line);
+      border-radius: var(--radius-md);
+      padding: 12px;
+      background: #fff;
+      display: grid;
+      gap: 8px;
+      align-content: start;
+    }
+
+    .subject-pill {
+      border: 1px solid var(--line);
+      background: #f4f9ff;
+      border-radius: 10px;
+      min-height: 46px;
+      padding: 8px 10px;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    .subject-pill.active { background: #e5f2ff; border-color: #aecdff; }
+
+    .chapters-panel {
+      border: 1px solid var(--line);
+      border-radius: var(--radius-md);
+      padding: 12px;
+      background: #fff;
+      display: grid;
+      gap: 10px;
+    }
+
+    .chapter-card {
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      padding: 12px;
+      display: flex;
+      justify-content: space-between;
+      gap: 10px;
+      align-items: center;
+      flex-wrap: wrap;
+      background: #fcfdff;
+    }
+
+    .chapter-card p { color: var(--muted); font-size: 0.98rem; margin-top: 4px; }
+
+    .difficulty.easy { color: var(--green); }
+    .difficulty.medium { color: var(--orange); }
+
+    .status {
+      display: inline-block;
+      padding: 5px 10px;
+      border-radius: 999px;
+      font-size: 0.8rem;
+      font-weight: 700;
+      border: 1px solid var(--line);
+      background: #f5f7fb;
+    }
+
+    .status.done { color: #2f8a60; background: #e8fff4; border-color: #bdeed6; }
+
+    .chapter-actions { display: flex; align-items: center; gap: 10px; }
+
+    .reader-layout {
+      display: grid;
+      grid-template-columns: 1.7fr 1fr;
+      gap: 12px;
+    }
+
+    .reader-panel,
+    .reader-side,
+    .practice-panel,
+    .dashboard-panel,
+    .parent-panel {
+      border: 1px solid var(--line);
+      border-radius: var(--radius-md);
+      background: #fff;
+      padding: 12px;
+      display: grid;
+      gap: 10px;
+    }
+
+    .reader-toolbar {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(120px, 1fr));
+      gap: 10px;
+      border: 1px dashed #c7d9f1;
+      border-radius: 12px;
+      padding: 10px;
+      background: #f9fcff;
+    }
+
+    .control {
+      display: grid;
+      gap: 5px;
+      font-size: 0.82rem;
+      color: var(--muted);
+    }
+
+    .chunk-box {
+      border-radius: 14px;
+      border: 1px solid #d8e5f6;
+      background: var(--reader-bg);
+      min-height: 220px;
+      padding: 20px;
+      font-size: var(--reader-size);
+      line-height: var(--reader-line);
+      letter-spacing: 0.02em;
+    }
+
+    .reader-word { transition: background 0.1s ease; border-radius: 4px; }
+    .reader-word.active-word { background: #ffe595; }
+    .reader-word.difficult-word { text-decoration: underline; text-decoration-thickness: 2px; cursor: pointer; text-decoration-color: #67b2ff; }
+    .reader-word:focus-visible { outline: 3px solid #9ec4f4; outline-offset: 2px; }
+
+    .meaning-inline {
+      border: 1px solid #c8ddf7;
+      border-radius: 12px;
+      background: #edf6ff;
+      padding: 12px;
+      color: #2f4b71;
+      font-size: 1rem;
+      line-height: 1.6;
+    }
+
+    .row {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+
+    .bullets { padding-left: 18px; display: grid; gap: 6px; }
+    .chips { display: flex; gap: 7px; flex-wrap: wrap; }
+    .chip {
+      display: inline-flex;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      padding: 5px 10px;
+      background: #f3f8ff;
+      font-size: 0.82rem;
+    }
+
+    .placeholder-box {
+      border: 1px dashed #b8cde9;
+      border-radius: 10px;
+      padding: 10px;
+      font-size: 0.9rem;
+      color: #4a688f;
+      background: #f2f8ff;
+    }
+
+    .practice-panel h3 { font-size: 1.18rem; }
+    .options-wrap { display: grid; gap: 10px; margin-top: 12px; }
+    .option-btn { width: 100%; text-align: left; background: #f8fbff; }
+
+    .question-box { border: 1px solid var(--line); border-radius: 14px; padding: 14px; background: #fbfeff; }
+    .match-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 12px; }
+    .match-row { display: grid; grid-template-columns: 130px 1fr; gap: 8px; margin-bottom: 8px; }
+    .left-item { border-radius: 10px; border: 1px solid var(--line); background: #fff; padding: 10px; font-weight: 700; }
+    .drop-slot { border: 2px dashed #b7cde8; border-radius: 10px; padding: 10px; color: #6b7d99; min-height: 42px; background: #f8fcff; }
+    .drag-item { border-radius: 10px; border: 1px solid #b8cde8; background: #eaf4ff; padding: 10px; margin-bottom: 8px; cursor: grab; }
+
+    .result-box { border-radius: 12px; border: 1px solid #bde2cb; padding: 16px; background: #eefdf4; display: grid; gap: 8px; }
+
+    .dashboard-grid { grid-template-columns: 1fr 1fr; }
+    .dashboard-cards { display: grid; grid-template-columns: repeat(4, minmax(120px, 1fr)); gap: 10px; }
+    .dashboard-cards article { border: 1px solid var(--line); border-radius: 12px; background: #fff; padding: 10px; }
+    .dashboard-cards h4 { font-size: 1.3rem; color: #3d7ec4; }
+
+    .chart-wrap { height: 240px; }
+
+    .parent-table { width: 100%; border-collapse: collapse; }
+    .parent-table th,
+    .parent-table td { border-bottom: 1px solid var(--line); text-align: left; padding: 8px 6px; font-size: 0.86rem; }
+
+    .muted { color: var(--muted); font-size: 0.9rem; }
+
+    .footer-note {
+      color: var(--muted);
+      font-size: 0.83rem;
+      margin-top: 4px;
+    }
+
+    .focus-mode .sidebar,
+    .focus-mode #topbar,
+    .focus-mode #readerSide,
+    .focus-mode #readerMeta,
+    .focus-mode #readerActions {
+      display: none !important;
+    }
+
+    .focus-mode .app-shell {
+      grid-template-columns: 1fr;
+      padding: 8px;
+    }
+
+    .focus-mode .main {
+      padding: 10px;
+    }
+
+    @media (max-width: 1400px) {
+      .app-shell { grid-template-columns: 1fr; }
+      .sidebar { position: static; height: auto; }
+      .nav-btn { text-align: center; }
+    }
+
+    @media (max-width: 1150px) {
+      .subject-grid { grid-template-columns: repeat(2, minmax(160px, 1fr)); }
+      .reader-layout, .panel-grid, .dashboard-grid { grid-template-columns: 1fr; }
+      .dashboard-cards { grid-template-columns: repeat(2, minmax(120px, 1fr)); }
+    }
+
+    @media (max-width: 860px) {
+      .app-shell { grid-template-columns: 1fr; }
+      .sidebar { position: static; height: auto; }
+      .stats-grid { grid-template-columns: 1fr; }
+      .topbar { flex-direction: column; align-items: flex-start; }
+      .reader-toolbar { grid-template-columns: 1fr; }
+      .match-grid { grid-template-columns: 1fr; }
+      .dashboard-cards { grid-template-columns: 1fr; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after { transition: none !important; animation: none !important; }
+    }
+  </style>
+</head>
+<body>
+  <div class="app-shell">
+    <aside class="sidebar" aria-label="Sidebar Navigation">
+      <div class="brand">Dyslexia-Friendly NCERT Class 6</div>
+      <button class="nav-btn active" data-nav="home">Home</button>
+      <button class="nav-btn" data-nav="subjects">Subjects</button>
+      <button class="nav-btn" data-nav="reader">Smart Reader</button>
+      <button class="nav-btn" data-nav="practice">Practice</button>
+      <button class="nav-btn" data-nav="dashboard">Student Dashboard</button>
+
+      <div class="toggle-group">
+        <label class="toggle-row" for="focusToggle">
+          <span>Distraction-Free Mode</span>
+          <input id="focusToggle" type="checkbox" />
+        </label>
+        <label class="toggle-row" for="dyslexicFontToggle">
+          <span>OpenDyslexic Font</span>
+          <input id="dyslexicFontToggle" type="checkbox" />
+        </label>
+      </div>
+    </aside>
+
+    <main class="main">
+      <section id="topbar" class="topbar">
+        <div>
+          <h1>Welcome to Calm Learning</h1>
+          <p>Simple and supportive learning for CBSE Class 6 dyslexic students.</p>
+        </div>
+        <button id="startLearningBtn" class="primary-btn">Start Learning</button>
+      </section>
+
+      <section data-page="home">
+        <article class="hero">
+          <h2>Learn comfortably, step by step.</h2>
+          <p>This platform reads chapters aloud, highlights words, explains difficult terms, and tracks progress with rewards.</p>
+          <div class="row">
+            <button class="primary-btn" id="heroStartBtn" onclick="document.getElementById('startLearningBtn').click()">Start Learning</button>
+            <span class="chip">CBSE Class 6</span>
+            <span class="chip">NCERT Aligned</span>
+            <span class="chip">Accessible by Design</span>
+          </div>
+        </article>
+
+        <section>
+          <h3>Subjects</h3>
+          <div id="homeCards" class="subject-grid" aria-label="Subjects Grid"></div>
+        </section>
+
+        <section>
+          <h3>Progress Preview</h3>
+          <div id="previewStats" class="stats-grid"></div>
+        </section>
+      </section>
+
+      <section data-page="subjects" hidden>
+        <div class="panel-grid">
+          <article class="subject-pills">
+            <h3>Subjects</h3>
+            <div id="subjectsList"></div>
+          </article>
+          <article class="chapters-panel">
+            <h3>Chapters</h3>
+            <div id="chapterList"></div>
+          </article>
+        </div>
+      </section>
+
+      <section data-page="reader" hidden>
+        <div class="reader-layout">
+          <article class="reader-panel">
+            <h3 id="readerTitle">Chapter Reader</h3>
+            <div class="reader-toolbar" id="readerMeta">
+              <label class="control">Font Size
+                <input id="fontSlider" type="range" min="18" max="36" value="24" />
+              </label>
+              <label class="control">Line Spacing
+                <input id="lineSlider" type="range" min="1.3" max="2.4" value="1.8" step="0.1" />
+              </label>
+              <label class="control">Background
+                <select id="bgSelector">
+                  <option value="#fffdf2">Cream</option>
+                  <option value="#f3fbff">Soft Blue</option>
+                  <option value="#f3fff7">Soft Green</option>
+                </select>
+              </label>
+            </div>
+
+            <div class="chunk-box" id="chunkText" aria-live="polite"></div>
+            <div id="glossaryInline" class="meaning-inline" hidden></div>
+            <div class="row" id="readerActions">
+              <button class="secondary-btn" id="prevChunkBtn">Previous</button>
+              <button class="secondary-btn" id="nextChunkBtn">Next</button>
+              <button class="primary-btn" id="readChunkBtn">Read Aloud</button>
+              <button class="secondary-btn" id="stopReadBtn">Stop Audio</button>
+              <span class="chip" id="chunkCounter">Chunk 1 of 1</span>
+            </div>
+            <button id="startPracticeBtn" class="primary-btn">Start Quiz for this Chapter</button>
+          </article>
+
+          <aside class="reader-side" id="readerSide">
+            <article class="reader-side-block">
+              <h4>Easy Summary</h4>
+              <ul class="bullets" id="chapterSummary"></ul>
+            </article>
+            <article class="reader-side-block">
+              <h4>Key Concepts</h4>
+              <div id="chapterConcepts" class="chips"></div>
+            </article>
+            <article class="reader-side-block">
+              <h4>Visual Learning Diagram</h4>
+              <div id="chapterDiagram" class="placeholder-box"></div>
+            </article>
+            <article class="reader-side-block">
+              <h4>Video Explanation</h4>
+              <div id="chapterVideo" class="placeholder-box"></div>
+            </article>
+          </aside>
+        </div>
+      </section>
+
+      <section data-page="practice" hidden>
+        <article class="practice-panel">
+          <div class="row">
+            <h3>Practice Mode</h3>
+            <button id="readQuestionBtn" class="secondary-btn">Read Question</button>
+            <button id="practiceVoiceBtn" class="secondary-btn">Voice Answer (Simulated)</button>
+          </div>
+          <div id="practiceWrap"></div>
+        </article>
+      </section>
+
+      <section data-page="dashboard" hidden>
+        <article class="dashboard-panel">
+          <h3>Student Dashboard</h3>
+          <div id="dashboardStats" class="dashboard-cards"></div>
+          <div class="dashboard-grid">
+            <div>
+              <h4>Progress Overview</h4>
+              <div class="chart-wrap"><canvas id="progressChart"></canvas></div>
+            </div>
+            <div>
+              <h4>Per-Subject Scores</h4>
+              <div class="chart-wrap"><canvas id="subjectChart"></canvas></div>
+            </div>
+          </div>
+          <div class="dashboard-grid">
+            <div>
+              <h4>Weak Topics</h4>
+              <ul id="weakTopics" class="bullets"></ul>
+            </div>
+            <div>
+              <h4>Rewards & Levels</h4>
+              <div id="rewardsStrip" class="placeholder-box"></div>
+            </div>
+          </div>
+        </article>
+      </section>
+
+      <p class="footer-note">Keyboard support: use Left/Right arrows in Smart Reader to navigate chunks.</p>
+    </main>
+  </div>
+
+  <script type="module" src="./dyslexia/app.js"></script>
+</body>
+</html>

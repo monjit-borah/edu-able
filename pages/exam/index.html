@@ -1,0 +1,368 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>futura · exam</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:opsz@14..32&family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      color-scheme: dark;
+      --bg-0: #030303;
+      --bg-1: #0c0c0f;
+      --bg-2: #14151c;
+      --card: rgba(17, 17, 19, 0.7);
+      --card-2: rgba(9, 9, 12, 0.62);
+      --txt: #f2f2f5;
+      --muted: #9fa3b3;
+      --line: rgba(255, 255, 255, 0.09);
+      --accent: #dadde8;
+      --ok: #9ce4af;
+      --pulse: rgba(157, 165, 220, 0.25);
+      --radius-lg: 36px;
+      --radius-md: 24px;
+      --shadow: 0 30px 70px -24px rgba(0, 0, 0, 0.85);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: "Inter", "Poppins", system-ui, -apple-system, sans-serif;
+    }
+
+    body {
+      min-height: 100vh;
+      display: grid;
+      place-items: center;
+      overflow-x: hidden;
+      background:
+        radial-gradient(1100px 700px at 14% 8%, rgba(82, 92, 150, 0.14), transparent 58%),
+        radial-gradient(820px 560px at 100% 94%, rgba(70, 102, 130, 0.16), transparent 52%),
+        linear-gradient(160deg, var(--bg-0), var(--bg-1) 40%, var(--bg-2));
+      color: var(--txt);
+      padding: 24px;
+    }
+
+    .bg-orb {
+      position: fixed;
+      border-radius: 999px;
+      filter: blur(60px);
+      opacity: 0.7;
+      pointer-events: none;
+      z-index: 0;
+      animation: drift 18s ease-in-out infinite alternate;
+    }
+
+    .bg-orb.one {
+      width: 36vw;
+      height: 36vw;
+      min-width: 260px;
+      min-height: 260px;
+      left: -8vw;
+      top: 8vh;
+      background: rgba(112, 141, 255, 0.18);
+    }
+
+    .bg-orb.two {
+      width: 34vw;
+      height: 34vw;
+      min-width: 240px;
+      min-height: 240px;
+      right: -10vw;
+      bottom: 0;
+      background: rgba(80, 195, 173, 0.14);
+      animation-duration: 22s;
+    }
+
+    .exam-shell {
+      width: min(980px, 100%);
+      border-radius: var(--radius-lg);
+      background: var(--card);
+      border: 1px solid var(--line);
+      backdrop-filter: blur(14px) saturate(145%);
+      -webkit-backdrop-filter: blur(14px) saturate(145%);
+      box-shadow: var(--shadow);
+      padding: 28px;
+      position: relative;
+      z-index: 1;
+      animation: shell-enter 560ms cubic-bezier(.2, .9, .2, 1) both;
+    }
+
+    .exam-shell::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      border-radius: inherit;
+      border: 1px solid rgba(255, 255, 255, 0.04);
+      pointer-events: none;
+    }
+
+    .headline {
+      font-size: clamp(1.2rem, 2vw, 1.6rem);
+      font-family: "Poppins", "Inter", system-ui, sans-serif;
+      font-weight: 600;
+      margin-bottom: 6px;
+      letter-spacing: 0.01em;
+      animation: fade-rise 600ms 100ms ease both;
+    }
+
+    .subline {
+      color: var(--muted);
+      font-size: 0.95rem;
+      margin-bottom: 20px;
+      animation: fade-rise 600ms 180ms ease both;
+    }
+
+    .center {
+      min-height: 360px;
+      display: grid;
+      place-items: center;
+      animation: fade-rise 540ms 230ms ease both;
+    }
+
+    .btn {
+      appearance: none;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      padding: 14px 28px;
+      color: var(--txt);
+      background: linear-gradient(140deg, rgba(27, 27, 33, 0.92), rgba(35, 36, 44, 0.9));
+      font-weight: 600;
+      font-size: 1rem;
+      letter-spacing: 0.02em;
+      cursor: pointer;
+      transition: transform 0.2s ease, box-shadow 0.25s ease, border-color 0.2s ease;
+      box-shadow: 0 0 0 0 var(--pulse);
+      animation: button-pulse 2.8s ease-in-out infinite;
+    }
+
+    .btn:hover:enabled {
+      transform: translateY(-1px) scale(1.01);
+      border-color: rgba(189, 198, 255, 0.55);
+      box-shadow: 0 12px 28px rgba(0, 0, 0, 0.44), 0 0 24px rgba(135, 147, 231, 0.18);
+    }
+
+    .btn:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+
+    .exam-grid {
+      display: grid;
+      gap: 18px;
+      grid-template-columns: 1.2fr 1fr;
+      align-items: stretch;
+      animation: fade-rise 500ms 260ms ease both;
+    }
+
+    @media (max-width: 920px) {
+      .exam-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .panel {
+      border: 1px solid var(--line);
+      border-radius: var(--radius-md);
+      padding: 18px;
+      background: linear-gradient(170deg, rgba(18, 18, 22, 0.72), var(--card-2));
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04);
+      transition: transform 0.3s ease, border-color 0.3s ease;
+    }
+
+    .panel:hover {
+      transform: translateY(-2px);
+      border-color: rgba(162, 178, 255, 0.32);
+    }
+
+    .counter {
+      color: var(--muted);
+      font-size: 0.9rem;
+      margin-bottom: 8px;
+    }
+
+    .question {
+      font-size: 1.15rem;
+      line-height: 1.45;
+      margin-bottom: 16px;
+      min-height: 94px;
+    }
+
+    .badge {
+      display: inline-block;
+      padding: 8px 14px;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      font-size: 0.9rem;
+      color: var(--accent);
+      background: rgba(255, 255, 255, 0.03);
+    }
+
+    .status {
+      margin-top: 14px;
+      color: var(--muted);
+      font-size: 0.95rem;
+      min-height: 20px;
+    }
+
+    .instruction {
+      margin-top: 8px;
+      font-size: 0.95rem;
+      color: var(--ok);
+      min-height: 20px;
+    }
+
+    .camera-wrap {
+      width: 100%;
+      aspect-ratio: 16 / 9;
+      overflow: hidden;
+      border-radius: 16px;
+      border: 1px solid var(--line);
+      background: #050507;
+      position: relative;
+      box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.02), 0 16px 34px rgba(0, 0, 0, 0.55);
+    }
+
+    #cameraVideo {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      display: block;
+      object-fit: cover;
+      transform: scaleX(-1);
+      z-index: 2;
+      pointer-events: none;
+    }
+
+    #cameraCanvas {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      display: block;
+      object-fit: cover;
+      transform: scaleX(-1);
+      z-index: 1;
+    }
+
+    .result-row {
+      display: flex;
+      gap: 14px;
+      flex-wrap: wrap;
+      margin-top: 16px;
+    }
+
+    .result-card {
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      padding: 12px 14px;
+      min-width: 160px;
+      background: rgba(255, 255, 255, 0.02);
+      animation: fade-rise 520ms ease both;
+    }
+
+    .result-card p:first-child {
+      font-size: 0.85rem;
+      color: var(--muted);
+      margin-bottom: 4px;
+    }
+
+    .result-card p:last-child {
+      font-size: 1.2rem;
+      font-weight: 700;
+    }
+
+    #stageActive .panel:first-child { animation: fade-rise 500ms 80ms ease both; }
+    #stageActive .panel:last-child { animation: fade-rise 500ms 140ms ease both; }
+
+    @keyframes shell-enter {
+      from { opacity: 0; transform: translateY(14px) scale(0.99); }
+      to { opacity: 1; transform: translateY(0) scale(1); }
+    }
+
+    @keyframes fade-rise {
+      from { opacity: 0; transform: translateY(12px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes button-pulse {
+      0%, 100% { box-shadow: 0 0 0 0 rgba(157, 165, 220, 0); }
+      50% { box-shadow: 0 0 0 8px rgba(157, 165, 220, 0.08); }
+    }
+
+    @keyframes drift {
+      from { transform: translate3d(0, 0, 0) scale(1); }
+      to { transform: translate3d(0, -18px, 0) scale(1.06); }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        animation: none !important;
+        transition: none !important;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="bg-orb one"></div>
+  <div class="bg-orb two"></div>
+  <main class="exam-shell" id="examApp">
+    <h1 class="headline">Hands-Free Inclusive Exam</h1>
+    <p class="subline">Head gesture control only. Nod = YES, Shake = NO.</p>
+
+    <section id="stageIdle" class="center">
+      <button id="startExamBtn" class="btn" type="button">Start Exam</button>
+    </section>
+
+    <section id="stageActive" hidden>
+      <div class="exam-grid">
+        <article class="panel">
+          <p class="counter" id="questionCounter">Question 0 of 0</p>
+          <p class="question" id="questionText">Preparing question...</p>
+          <p class="badge" id="selectedAnswer">Waiting for your head gesture...</p>
+          <p class="status" id="statusText"></p>
+          <p class="instruction" id="instructionText"></p>
+        </article>
+
+        <article class="panel">
+          <div class="camera-wrap">
+            <video id="cameraVideo" autoplay playsinline muted></video>
+            <canvas id="cameraCanvas"></canvas>
+          </div>
+        </article>
+      </div>
+    </section>
+
+    <section id="stageResult" hidden>
+      <article class="panel">
+        <p class="question">Exam Completed</p>
+        <div class="result-row">
+          <div class="result-card">
+            <p>Total Questions</p>
+            <p id="resultTotal">0</p>
+          </div>
+          <div class="result-card">
+            <p>Correct Answers</p>
+            <p id="resultCorrect">0</p>
+          </div>
+          <div class="result-card">
+            <p>Final Score</p>
+            <p id="resultScore">0 / 0</p>
+          </div>
+        </div>
+        <p class="status">Result announced.</p>
+        <p class="instruction">Voice summary completed.</p>
+      </article>
+    </section>
+  </main>
+
+  <script src="https://docs.opencv.org/4.10.0/opencv.js" async></script>
+  <script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@mediapipe/face_mesh/face_mesh.js"></script>
+  <script type="module" src="../../components/exam/exam-engine.js"></script>
+</body>
+</html>

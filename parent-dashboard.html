@@ -1,0 +1,842 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Parent Dashboard · Futura</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Manrope:wght@600;700;800&display=swap" rel="stylesheet" />
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    :root {
+      --bg-0: #06070a;
+      --bg-1: #0d1017;
+      --panel: rgba(17, 20, 28, 0.82);
+      --panel-soft: rgba(11, 14, 20, 0.7);
+      --line: rgba(255, 255, 255, 0.1);
+      --txt: #eef2ff;
+      --muted: #96a0bd;
+      --cyan: #40d9ff;
+      --green: #67e38f;
+      --orange: #ffb14b;
+      --blue: #54a7ff;
+      --red: #ff7272;
+      --radius-xl: 22px;
+      --radius-md: 14px;
+      --shadow: 0 28px 70px -28px rgba(0, 0, 0, 0.85);
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      min-height: 100vh;
+      font-family: Inter, system-ui, sans-serif;
+      color: var(--txt);
+      background:
+        radial-gradient(980px 620px at 8% 2%, rgba(61, 210, 255, 0.11), transparent 56%),
+        radial-gradient(840px 560px at 100% 95%, rgba(84, 167, 255, 0.12), transparent 52%),
+        linear-gradient(160deg, var(--bg-0), var(--bg-1));
+      overflow-x: hidden;
+    }
+
+    .layout {
+      display: grid;
+      grid-template-columns: 250px 1fr;
+      min-height: 100vh;
+      gap: 16px;
+      padding: 16px;
+    }
+
+    .sidebar,
+    .main-shell {
+      border: 1px solid var(--line);
+      border-radius: var(--radius-xl);
+      background: var(--panel);
+      backdrop-filter: blur(12px) saturate(140%);
+      -webkit-backdrop-filter: blur(12px) saturate(140%);
+      box-shadow: var(--shadow);
+    }
+
+    .sidebar {
+      padding: 20px 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+      animation: rise 500ms ease both;
+      position: sticky;
+      top: 16px;
+      height: calc(100vh - 32px);
+    }
+
+    .brand {
+      font-family: Manrope, Inter, sans-serif;
+      font-size: 1.2rem;
+      font-weight: 800;
+      letter-spacing: 0.02em;
+      padding: 4px 8px 12px;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .nav {
+      display: grid;
+      gap: 8px;
+    }
+
+    .nav a {
+      text-decoration: none;
+      color: #cfd8ef;
+      border: 1px solid transparent;
+      border-radius: 12px;
+      padding: 10px 12px;
+      font-weight: 600;
+      transition: all 0.2s ease;
+    }
+
+    .nav a:hover {
+      background: rgba(84, 167, 255, 0.09);
+      border-color: rgba(84, 167, 255, 0.4);
+      color: #fff;
+      transform: translateX(2px);
+    }
+
+    .sidebar-foot {
+      margin-top: auto;
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      padding: 10px;
+      font-size: 0.82rem;
+      color: var(--muted);
+      line-height: 1.5;
+      background: var(--panel-soft);
+    }
+
+    .main-shell {
+      padding: 16px;
+      animation: rise 580ms 90ms ease both;
+    }
+
+    .topbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 14px;
+      margin-bottom: 14px;
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      padding: 14px;
+      background: linear-gradient(130deg, rgba(64, 217, 255, 0.07), rgba(84, 167, 255, 0.06));
+    }
+
+    .headline {
+      font-family: Manrope, Inter, sans-serif;
+      font-size: clamp(1.06rem, 1.8vw, 1.4rem);
+      font-weight: 800;
+    }
+
+    .subline {
+      margin-top: 4px;
+      color: var(--muted);
+      font-size: 0.9rem;
+    }
+
+    .top-chip {
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      padding: 8px 12px;
+      font-size: 0.84rem;
+      color: #d9e7ff;
+      background: rgba(10, 13, 19, 0.65);
+    }
+
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(130px, 1fr));
+      gap: 12px;
+      margin-bottom: 12px;
+    }
+
+    .stat {
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      background: var(--panel-soft);
+      padding: 12px;
+      transition: transform 0.2s ease, border-color 0.2s ease;
+    }
+
+    .stat:hover {
+      transform: translateY(-2px);
+      border-color: rgba(103, 227, 143, 0.42);
+    }
+
+    .stat .label { color: var(--muted); font-size: 0.8rem; }
+    .stat .value { margin-top: 6px; font-size: 1.35rem; font-weight: 800; }
+    .cyan { color: var(--cyan); }
+    .green { color: var(--green); }
+    .orange { color: var(--orange); }
+    .blue { color: var(--blue); }
+
+    .grid-2 {
+      display: grid;
+      grid-template-columns: 1.5fr 1fr;
+      gap: 12px;
+      margin-bottom: 12px;
+    }
+
+    .panel {
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      background: var(--panel-soft);
+      padding: 14px;
+      animation: rise 480ms ease both;
+    }
+
+    .panel-title {
+      font-size: 1rem;
+      font-weight: 700;
+      margin-bottom: 12px;
+    }
+
+    .profile-row {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .avatar {
+      width: 66px;
+      height: 66px;
+      border-radius: 50%;
+      object-fit: cover;
+      border: 2px solid rgba(64, 217, 255, 0.5);
+      box-shadow: 0 0 0 4px rgba(64, 217, 255, 0.12);
+    }
+
+    .profile-meta h3 { font-size: 1.02rem; }
+    .meta {
+      margin-top: 2px;
+      font-size: 0.84rem;
+      color: var(--muted);
+    }
+
+    .profile-details {
+      margin-top: 12px;
+      display: grid;
+      grid-template-columns: repeat(2, minmax(120px, 1fr));
+      gap: 8px;
+      font-size: 0.84rem;
+    }
+
+    .kv {
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      background: rgba(11, 14, 20, 0.9);
+      padding: 8px;
+    }
+
+    .kv .k { color: var(--muted); font-size: 0.76rem; }
+    .kv .v { margin-top: 2px; font-weight: 600; }
+
+    .notif-list {
+      display: grid;
+      gap: 8px;
+      max-height: 245px;
+      overflow: auto;
+      padding-right: 4px;
+    }
+
+    .notif {
+      border: 1px solid var(--line);
+      border-radius: 11px;
+      padding: 10px;
+      background: rgba(12, 17, 24, 0.92);
+      display: grid;
+      gap: 4px;
+    }
+
+    .notif .t { font-size: 0.86rem; font-weight: 600; }
+    .notif .d { font-size: 0.79rem; color: var(--muted); }
+
+    .chart-grid {
+      display: grid;
+      grid-template-columns: 1.35fr 1fr;
+      gap: 12px;
+      margin-bottom: 12px;
+    }
+
+    .chart-wrap {
+      height: 280px;
+      position: relative;
+    }
+
+    .subject-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(180px, 1fr));
+      gap: 10px;
+    }
+
+    .subject-card {
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      background: rgba(13, 17, 26, 0.9);
+      padding: 10px;
+    }
+
+    .subject-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-size: 0.88rem;
+      margin-bottom: 8px;
+    }
+
+    .bar {
+      width: 100%;
+      height: 8px;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.08);
+      overflow: hidden;
+    }
+
+    .bar > span {
+      display: block;
+      height: 100%;
+      border-radius: inherit;
+      background: linear-gradient(90deg, var(--cyan), var(--green));
+      transition: width 0.6s ease;
+    }
+
+    .history-list {
+      display: grid;
+      gap: 8px;
+      max-height: 240px;
+      overflow: auto;
+      padding-right: 4px;
+    }
+
+    .history-item {
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      padding: 10px;
+      background: rgba(11, 15, 23, 0.85);
+    }
+
+    .history-item .h-title { font-weight: 600; font-size: 0.9rem; }
+    .history-item .h-sub { font-size: 0.8rem; color: var(--muted); margin-top: 3px; }
+
+    .records-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(200px, 1fr));
+      gap: 12px;
+      margin-bottom: 12px;
+    }
+
+    .table-wrap { overflow: auto; max-height: 260px; }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.82rem;
+    }
+
+    th, td {
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+      text-align: left;
+      padding: 8px 6px;
+      white-space: nowrap;
+    }
+
+    th { color: #d4dbef; font-weight: 700; }
+    td { color: #c4cde5; }
+
+    .pill {
+      display: inline-block;
+      border-radius: 999px;
+      padding: 3px 8px;
+      font-size: 0.74rem;
+      font-weight: 700;
+      border: 1px solid transparent;
+    }
+
+    .pill.good { color: #9af0b7; border-color: rgba(103, 227, 143, 0.45); background: rgba(103, 227, 143, 0.08); }
+    .pill.warn { color: #ffd19a; border-color: rgba(255, 177, 75, 0.45); background: rgba(255, 177, 75, 0.09); }
+    .pill.info { color: #99dcff; border-color: rgba(64, 217, 255, 0.45); background: rgba(64, 217, 255, 0.09); }
+
+    .milestones {
+      display: grid;
+      gap: 8px;
+    }
+
+    .milestone {
+      border-left: 3px solid var(--cyan);
+      padding: 8px 10px;
+      border-radius: 10px;
+      background: rgba(10, 15, 23, 0.9);
+      border: 1px solid var(--line);
+    }
+
+    .milestone .m-title { font-size: 0.86rem; font-weight: 700; }
+    .milestone .m-date { font-size: 0.76rem; color: var(--muted); margin-top: 3px; }
+
+    @keyframes rise {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    @media (max-width: 1180px) {
+      .layout { grid-template-columns: 210px 1fr; }
+      .stats-grid { grid-template-columns: repeat(2, minmax(130px, 1fr)); }
+      .records-grid { grid-template-columns: 1fr; }
+    }
+
+    @media (max-width: 940px) {
+      .layout { grid-template-columns: 1fr; }
+      .sidebar { position: static; height: auto; }
+      .grid-2, .chart-grid, .subject-grid { grid-template-columns: 1fr; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after { animation: none !important; transition: none !important; }
+    }
+  </style>
+</head>
+<body>
+  <div class="layout">
+    <aside class="sidebar">
+      <div class="brand">Parent Control Hub</div>
+      <nav class="nav">
+        <a href="#overview">Overview</a>
+        <a href="#profile">Student Profile</a>
+        <a href="#progress">Progress & Charts</a>
+        <a href="#records">Track Records</a>
+        <a href="#history">Study History</a>
+        <a href="#milestones">Milestones</a>
+      </nav>
+      <div class="sidebar-foot">
+        Live sync enabled: new exam scores from this website are automatically saved and shown here.
+      </div>
+    </aside>
+
+    <main class="main-shell">
+      <section class="topbar" id="overview">
+        <div>
+          <div class="headline">Parental Dashboard</div>
+          <div class="subline" id="summaryLine">Tracking student learning journey in real time.</div>
+        </div>
+        <div class="top-chip" id="lastUpdatedChip">Updated: --</div>
+      </section>
+
+      <section class="stats-grid">
+        <article class="stat"><div class="label">Overall Performance</div><div class="value cyan" id="overallPerformance">0%</div></article>
+        <article class="stat"><div class="label">Assignments Completed</div><div class="value green" id="assignmentCompletion">0</div></article>
+        <article class="stat"><div class="label">Average Exam Score</div><div class="value orange" id="avgExamScore">0%</div></article>
+        <article class="stat"><div class="label">Engagement Index</div><div class="value blue" id="engagementIndex">0%</div></article>
+      </section>
+
+      <section class="grid-2" id="profile">
+        <article class="panel">
+          <div class="panel-title">Student Profile</div>
+          <div class="profile-row">
+            <img id="studentPhoto" class="avatar" alt="Student Photo" />
+            <div class="profile-meta">
+              <h3 id="studentName">Student</h3>
+              <p class="meta" id="studentClass">Grade 8 • Learning Program</p>
+              <p class="meta" id="studentEmail">--</p>
+            </div>
+          </div>
+          <div class="profile-details">
+            <div class="kv"><div class="k">Parent Name</div><div class="v" id="parentName">--</div></div>
+            <div class="kv"><div class="k">Parent Email</div><div class="v" id="parentEmail">--</div></div>
+            <div class="kv"><div class="k">Learning Streak</div><div class="v" id="learningStreak">--</div></div>
+            <div class="kv"><div class="k">Last Exam</div><div class="v" id="lastExamScore">--</div></div>
+          </div>
+        </article>
+
+        <article class="panel">
+          <div class="panel-title">Notifications</div>
+          <div class="notif-list" id="notificationList"></div>
+        </article>
+      </section>
+
+      <section class="chart-grid" id="progress">
+        <article class="panel">
+          <div class="panel-title">Exam Score Trend</div>
+          <div class="chart-wrap"><canvas id="examTrendChart"></canvas></div>
+        </article>
+
+        <article class="panel">
+          <div class="panel-title">Completion Snapshot</div>
+          <div class="chart-wrap"><canvas id="completionChart"></canvas></div>
+        </article>
+      </section>
+
+      <section class="grid-2">
+        <article class="panel">
+          <div class="panel-title">Per-Subject Performance</div>
+          <div class="subject-grid" id="subjectGrid"></div>
+        </article>
+
+        <article class="panel" id="history">
+          <div class="panel-title">Study History</div>
+          <div class="history-list" id="studyHistoryList"></div>
+        </article>
+      </section>
+
+      <section class="records-grid" id="records">
+        <article class="panel">
+          <div class="panel-title">Activities Track Record</div>
+          <div class="table-wrap"><table><thead><tr><th>Activity</th><th>Subject</th><th>Status</th><th>Date</th></tr></thead><tbody id="activitiesTable"></tbody></table></div>
+        </article>
+
+        <article class="panel">
+          <div class="panel-title">Assignments Track Record</div>
+          <div class="table-wrap"><table><thead><tr><th>Assignment</th><th>Subject</th><th>Score</th><th>Status</th></tr></thead><tbody id="assignmentsTable"></tbody></table></div>
+        </article>
+
+        <article class="panel">
+          <div class="panel-title">Exam Panel Integration</div>
+          <div class="table-wrap"><table><thead><tr><th>Exam</th><th>Date</th><th>Score</th><th>Result</th></tr></thead><tbody id="examsTable"></tbody></table></div>
+        </article>
+      </section>
+
+      <section class="panel" id="milestones">
+        <div class="panel-title">Milestones & Upcoming Exams</div>
+        <div class="milestones" id="milestonesList"></div>
+      </section>
+    </main>
+  </div>
+
+  <script>
+    (function () {
+      const DASH_KEY = "parentDashboardData.v1";
+      const PROFILE_KEY = "parentStudentProfile";
+      const EXAM_HISTORY_KEY = "examHistory";
+
+      const seedData = {
+        student: {
+          name: "Aarav Sharma",
+          className: "Grade 8 • Inclusive STEM",
+          email: "student@futura.learn",
+          parentName: "Anita Sharma",
+          parentEmail: "parent@futura.learn",
+          streakDays: 14
+        },
+        activities: [
+          { title: "Science Video Session", subject: "Science", status: "Completed", date: "2026-02-16", engagement: 91 },
+          { title: "Math Practice Lab", subject: "Math", status: "Completed", date: "2026-02-15", engagement: 84 },
+          { title: "Reading Comprehension", subject: "English", status: "Completed", date: "2026-02-14", engagement: 79 },
+          { title: "History Story Review", subject: "History", status: "Completed", date: "2026-02-13", engagement: 87 }
+        ],
+        assignments: [
+          { title: "Fractions Worksheet", subject: "Math", score: 88, status: "Submitted" },
+          { title: "Plant Cell Diagram", subject: "Science", score: 93, status: "Submitted" },
+          { title: "Paragraph Writing", subject: "English", score: 81, status: "Submitted" },
+          { title: "Map Label Activity", subject: "History", score: 86, status: "Submitted" }
+        ],
+        studyHistory: [
+          { topic: "Fractions and Decimals", subject: "Math", progress: 78, engagement: 82, minutes: 42, lastStudied: "2026-02-18" },
+          { topic: "Photosynthesis Basics", subject: "Science", progress: 88, engagement: 90, minutes: 38, lastStudied: "2026-02-17" },
+          { topic: "Reading & Inference", subject: "English", progress: 74, engagement: 76, minutes: 31, lastStudied: "2026-02-16" },
+          { topic: "Ancient Civilizations", subject: "History", progress: 81, engagement: 80, minutes: 29, lastStudied: "2026-02-15" }
+        ],
+        milestones: [
+          { title: "Completed first 10 inclusive lessons", date: "2026-02-10" },
+          { title: "Reached 85% average in Science", date: "2026-02-14" },
+          { title: "14-day learning streak achieved", date: "2026-02-18" }
+        ],
+        upcomingExams: [
+          { title: "Math Weekly Quiz", date: "2026-02-24" },
+          { title: "Science Concept Check", date: "2026-02-27" }
+        ]
+      };
+
+      function parseJson(key, fallback) {
+        try {
+          return JSON.parse(localStorage.getItem(key) || JSON.stringify(fallback));
+        } catch (_err) {
+          return fallback;
+        }
+      }
+
+      function saveDashboard(data) {
+        localStorage.setItem(DASH_KEY, JSON.stringify(data));
+      }
+
+      function formatDate(dateString) {
+        const date = new Date(dateString);
+        if (Number.isNaN(date.getTime())) return "--";
+        return date.toLocaleDateString(undefined, { month: "short", day: "numeric", year: "numeric" });
+      }
+
+      function buildData() {
+        const stored = parseJson(DASH_KEY, seedData);
+        const loginProfile = parseJson(PROFILE_KEY, {});
+        const examHistory = parseJson(EXAM_HISTORY_KEY, []);
+
+        const studentName = loginProfile.studentName || stored.student.name;
+        const parentEmail = loginProfile.parentEmail || loginProfile.email || stored.student.parentEmail;
+        const parentName = loginProfile.parentName || loginProfile.name || stored.student.parentName;
+
+        stored.student = {
+          ...stored.student,
+          name: studentName,
+          parentEmail,
+          parentName
+        };
+
+        stored.exams = examHistory.map((item) => ({
+          title: item.title || "Exam",
+          subject: item.subject || "General",
+          scorePercent: Number(item.scorePercent || 0),
+          correct: Number(item.correct || 0),
+          total: Number(item.total || 0),
+          createdAt: item.createdAt || new Date().toISOString()
+        }));
+
+        saveDashboard(stored);
+        return stored;
+      }
+
+      function renderProfile(data) {
+        const s = data.student;
+        const photoUrl = `https://ui-avatars.com/api/?name=${encodeURIComponent(s.name)}&background=0f172a&color=67e38f&size=128&rounded=true&bold=true`;
+
+        document.getElementById("studentPhoto").src = photoUrl;
+        document.getElementById("studentName").textContent = s.name;
+        document.getElementById("studentClass").textContent = s.className;
+        document.getElementById("studentEmail").textContent = s.email;
+        document.getElementById("parentName").textContent = s.parentName;
+        document.getElementById("parentEmail").textContent = s.parentEmail;
+        document.getElementById("learningStreak").textContent = `${s.streakDays} days`;
+
+        const lastExam = data.exams[0];
+        document.getElementById("lastExamScore").textContent = lastExam ? `${lastExam.scorePercent}% (${lastExam.correct}/${lastExam.total})` : "No exams yet";
+      }
+
+      function pill(status) {
+        const s = String(status || "").toLowerCase();
+        if (s.includes("complete") || s.includes("submit") || s.includes("pass")) return "good";
+        if (s.includes("upcoming") || s.includes("pending")) return "warn";
+        return "info";
+      }
+
+      function renderTables(data) {
+        const activitiesBody = document.getElementById("activitiesTable");
+        const assignmentsBody = document.getElementById("assignmentsTable");
+        const examsBody = document.getElementById("examsTable");
+
+        activitiesBody.innerHTML = data.activities.map((a) => `
+          <tr>
+            <td>${a.title}</td>
+            <td>${a.subject}</td>
+            <td><span class="pill ${pill(a.status)}">${a.status}</span></td>
+            <td>${formatDate(a.date)}</td>
+          </tr>
+        `).join("");
+
+        assignmentsBody.innerHTML = data.assignments.map((a) => `
+          <tr>
+            <td>${a.title}</td>
+            <td>${a.subject}</td>
+            <td>${a.score}%</td>
+            <td><span class="pill ${pill(a.status)}">${a.status}</span></td>
+          </tr>
+        `).join("");
+
+        examsBody.innerHTML = data.exams.length ? data.exams.map((e) => `
+          <tr>
+            <td>${e.title}</td>
+            <td>${formatDate(e.createdAt)}</td>
+            <td>${e.scorePercent}% (${e.correct}/${e.total})</td>
+            <td><span class="pill ${e.scorePercent >= 60 ? "good" : "warn"}">${e.scorePercent >= 60 ? "Passed" : "Needs Work"}</span></td>
+          </tr>
+        `).join("") : `<tr><td colspan="4">No exam records yet. Complete an exam to auto-sync score here.</td></tr>`;
+      }
+
+      function renderStudyHistory(data) {
+        const list = document.getElementById("studyHistoryList");
+        list.innerHTML = data.studyHistory.map((item) => `
+          <article class="history-item">
+            <div class="h-title">${item.topic}</div>
+            <div class="h-sub">${item.subject} · Progress ${item.progress}% · Engagement ${item.engagement}% · ${item.minutes} min · ${formatDate(item.lastStudied)}</div>
+            <div class="bar" style="margin-top:8px;"><span style="width:${item.progress}%;"></span></div>
+          </article>
+        `).join("");
+      }
+
+      function computeSubjectPerformance(data) {
+        const map = {};
+
+        data.studyHistory.forEach((x) => {
+          if (!map[x.subject]) map[x.subject] = [];
+          map[x.subject].push(x.progress);
+        });
+
+        data.assignments.forEach((x) => {
+          if (!map[x.subject]) map[x.subject] = [];
+          map[x.subject].push(x.score);
+        });
+
+        data.exams.forEach((x) => {
+          const key = x.subject || "General";
+          if (!map[key]) map[key] = [];
+          map[key].push(x.scorePercent);
+        });
+
+        const out = Object.entries(map).map(([subject, arr]) => ({
+          subject,
+          value: Math.round(arr.reduce((a, b) => a + b, 0) / arr.length)
+        }));
+
+        return out.sort((a, b) => b.value - a.value);
+      }
+
+      function renderSubjectCards(subjects) {
+        const grid = document.getElementById("subjectGrid");
+        grid.innerHTML = subjects.map((s) => `
+          <article class="subject-card">
+            <div class="subject-head"><strong>${s.subject}</strong><span>${s.value}%</span></div>
+            <div class="bar"><span style="width:${s.value}%"></span></div>
+          </article>
+        `).join("");
+      }
+
+      function renderMilestones(data) {
+        const list = document.getElementById("milestonesList");
+        const milestoneItems = data.milestones.map((m) => ({ title: m.title, date: m.date }));
+        const upcomingItems = data.upcomingExams.map((u) => ({ title: `Upcoming: ${u.title}`, date: u.date }));
+        list.innerHTML = [...milestoneItems, ...upcomingItems]
+          .sort((a, b) => new Date(b.date) - new Date(a.date))
+          .map((item) => `
+            <article class="milestone">
+              <div class="m-title">${item.title}</div>
+              <div class="m-date">${formatDate(item.date)}</div>
+            </article>
+          `).join("");
+      }
+
+      function renderNotifications(data) {
+        const list = document.getElementById("notificationList");
+        const notes = [];
+
+        if (data.exams[0]) {
+          notes.push({
+            title: `New exam score synced: ${data.exams[0].scorePercent}%`,
+            detail: `${data.exams[0].title} • ${formatDate(data.exams[0].createdAt)}`
+          });
+        }
+
+        const avgExam = data.exams.length
+          ? Math.round(data.exams.reduce((sum, e) => sum + e.scorePercent, 0) / data.exams.length)
+          : 0;
+
+        if (avgExam >= 85) {
+          notes.push({ title: "Achievement unlocked: Excellent exam consistency", detail: `Average exam score is ${avgExam}%` });
+        }
+
+        data.upcomingExams.forEach((u) => {
+          notes.push({ title: `Upcoming exam: ${u.title}`, detail: `Scheduled for ${formatDate(u.date)}` });
+        });
+
+        if (!notes.length) {
+          notes.push({ title: "No alerts yet", detail: "New scores and milestones will appear here." });
+        }
+
+        list.innerHTML = notes.map((n) => `
+          <article class="notif">
+            <div class="t">${n.title}</div>
+            <div class="d">${n.detail}</div>
+          </article>
+        `).join("");
+      }
+
+      function renderStats(data, subjects) {
+        const assignmentCompletion = data.assignments.filter((x) => /submitted|complete/i.test(x.status)).length;
+        const avgExam = data.exams.length
+          ? Math.round(data.exams.reduce((sum, e) => sum + e.scorePercent, 0) / data.exams.length)
+          : 0;
+        const engagement = Math.round(data.studyHistory.reduce((sum, s) => sum + s.engagement, 0) / data.studyHistory.length);
+        const overallBase = [...subjects.map((s) => s.value), avgExam || 0, engagement || 0];
+        const overall = Math.round(overallBase.reduce((a, b) => a + b, 0) / overallBase.length);
+
+        document.getElementById("overallPerformance").textContent = `${overall}%`;
+        document.getElementById("assignmentCompletion").textContent = `${assignmentCompletion}/${data.assignments.length}`;
+        document.getElementById("avgExamScore").textContent = `${avgExam}%`;
+        document.getElementById("engagementIndex").textContent = `${engagement}%`;
+        document.getElementById("summaryLine").textContent = `${data.student.name} has completed ${data.activities.length} activities, ${data.assignments.length} assignments, and ${data.exams.length} exams.`;
+        document.getElementById("lastUpdatedChip").textContent = `Updated: ${new Date().toLocaleString()}`;
+      }
+
+      function renderCharts(data, subjects) {
+        const trend = [...data.exams].reverse().slice(-10);
+        const trendLabels = trend.map((e, i) => `Exam ${i + 1}`);
+        const trendValues = trend.map((e) => e.scorePercent);
+
+        new Chart(document.getElementById("examTrendChart"), {
+          type: "line",
+          data: {
+            labels: trendLabels.length ? trendLabels : ["No Exams"],
+            datasets: [{
+              label: "Score %",
+              data: trendValues.length ? trendValues : [0],
+              borderColor: "#40d9ff",
+              backgroundColor: "rgba(64,217,255,0.2)",
+              borderWidth: 3,
+              tension: 0.35,
+              pointBackgroundColor: "#67e38f",
+              pointRadius: 4
+            }]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: { legend: { labels: { color: "#d7e2ff" } } },
+            scales: {
+              x: { ticks: { color: "#98a8cc" }, grid: { color: "rgba(255,255,255,0.07)" } },
+              y: { min: 0, max: 100, ticks: { color: "#98a8cc" }, grid: { color: "rgba(255,255,255,0.07)" } }
+            }
+          }
+        });
+
+        const completedActivities = data.activities.filter((x) => /complete/i.test(x.status)).length;
+        const completedAssignments = data.assignments.filter((x) => /submitted|complete/i.test(x.status)).length;
+        const examsDone = data.exams.length;
+
+        new Chart(document.getElementById("completionChart"), {
+          type: "doughnut",
+          data: {
+            labels: ["Activities", "Assignments", "Exams"],
+            datasets: [{
+              data: [completedActivities, completedAssignments, examsDone],
+              backgroundColor: ["#40d9ff", "#67e38f", "#ffb14b"],
+              borderColor: ["#13202d", "#13202d", "#13202d"],
+              borderWidth: 2
+            }]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: { legend: { labels: { color: "#d7e2ff" } } }
+          }
+        });
+      }
+
+      function init() {
+        const data = buildData();
+        const subjects = computeSubjectPerformance(data);
+
+        renderProfile(data);
+        renderTables(data);
+        renderStudyHistory(data);
+        renderSubjectCards(subjects);
+        renderMilestones(data);
+        renderNotifications(data);
+        renderStats(data, subjects);
+        renderCharts(data, subjects);
+      }
+
+      init();
+    })();
+  </script>
+</body>
+</html>

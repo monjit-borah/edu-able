@@ -1,0 +1,700 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Blind Learning Mode</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Poppins:wght@500;600;700&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --bg0: #030303;
+      --bg1: #0d0d0d;
+      --glass: rgba(19, 19, 19, 0.68);
+      --line: rgba(255, 255, 255, 0.08);
+      --txt: #f1f1f1;
+      --txt-soft: #9ea5b4;
+      --accent: #79c2ff;
+      --ok: #6de3a4;
+      --warn: #ffc46d;
+      --danger: #ff8e8e;
+      --radius: 22px;
+      --shadow: 0 35px 70px -26px rgba(0, 0, 0, 0.8);
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      min-height: 100vh;
+      font-family: Inter, system-ui, -apple-system, sans-serif;
+      color: var(--txt);
+      background:
+        radial-gradient(900px 600px at 12% 8%, rgba(71, 71, 71, 0.24), transparent 55%),
+        radial-gradient(780px 520px at 100% 96%, rgba(31, 53, 83, 0.22), transparent 48%),
+        linear-gradient(160deg, var(--bg0), var(--bg1));
+      padding: 20px;
+    }
+
+    .grid-wrap {
+      max-width: 1280px;
+      margin: 0 auto;
+      display: grid;
+      gap: 16px;
+    }
+
+    .panel {
+      background: var(--glass);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      backdrop-filter: blur(13px) saturate(150%);
+      -webkit-backdrop-filter: blur(13px) saturate(150%);
+      box-shadow: var(--shadow);
+      padding: 16px;
+    }
+
+    .title {
+      font-family: Poppins, sans-serif;
+      font-size: clamp(1.2rem, 1.8vw, 1.8rem);
+      font-weight: 700;
+      margin-bottom: 6px;
+    }
+
+    .sub { color: var(--txt-soft); font-size: 0.94rem; }
+
+    .status {
+      margin-top: 10px;
+      border: 1px solid #30506d;
+      border-radius: 12px;
+      background: rgba(22, 39, 57, 0.86);
+      padding: 10px;
+      color: #cde8ff;
+      font-weight: 600;
+      font-size: 0.9rem;
+    }
+
+    .status.warn {
+      border-color: #7e5d2d;
+      background: rgba(58, 42, 19, 0.86);
+      color: #ffd9a8;
+    }
+
+    .status.error {
+      border-color: #6d2f2f;
+      background: rgba(50, 20, 20, 0.9);
+      color: #ffc2c2;
+    }
+
+    .pill-row { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
+
+    .pill {
+      border: 1px solid rgba(255, 255, 255, 0.18);
+      border-radius: 999px;
+      padding: 6px 10px;
+      font-size: 0.78rem;
+      background: rgba(19, 29, 41, 0.45);
+      color: #d5e2f0;
+    }
+
+    .main {
+      display: grid;
+      gap: 16px;
+      grid-template-columns: 1.2fr 1fr;
+    }
+
+    .controls { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
+
+    button {
+      border: 1px solid #3b4352;
+      background: rgba(12, 12, 12, 0.88);
+      color: var(--txt);
+      border-radius: 10px;
+      padding: 10px 12px;
+      font: inherit;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    button:hover { border-color: #89a9cf; }
+
+    .btn-accent {
+      border-color: #68aee8;
+      background: linear-gradient(140deg, rgba(24, 102, 162, 0.95), rgba(36, 128, 198, 0.95));
+    }
+
+    .list { margin-top: 10px; display: grid; gap: 8px; }
+
+    .item {
+      border: 1px solid #2a3547;
+      border-radius: 12px;
+      background: rgba(2, 8, 19, 0.7);
+      padding: 10px;
+      font-size: 0.93rem;
+      line-height: 1.4;
+    }
+
+    .item strong { color: #d5e9ff; }
+
+    .kbd {
+      border: 1px solid #55617b;
+      border-bottom-width: 2px;
+      border-radius: 6px;
+      padding: 2px 6px;
+      font-size: 0.75rem;
+      color: #c9d8ea;
+      background: rgba(15, 19, 30, 0.8);
+    }
+
+    .sr-only {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      padding: 0;
+      margin: -1px;
+      overflow: hidden;
+      clip: rect(0, 0, 0, 0);
+      white-space: nowrap;
+      border: 0;
+    }
+
+    figure {
+      margin-top: 10px;
+      border: 1px solid #2a3547;
+      border-radius: 12px;
+      padding: 10px;
+      background: rgba(2, 8, 19, 0.7);
+    }
+
+    figure img {
+      width: 100%;
+      max-height: 230px;
+      object-fit: cover;
+      border-radius: 8px;
+      border: 1px solid #31506e;
+    }
+
+    figcaption { margin-top: 8px; color: #bcd2ea; font-size: 0.86rem; }
+
+    @media (max-width: 960px) {
+      .main { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <main class="grid-wrap" aria-label="Blind learning mode">
+    <section class="panel" aria-labelledby="heading">
+      <h1 id="heading" class="title">Blind / Visually Impaired Learning Mode</h1>
+      <p class="sub">Same lesson concepts, voice-first and eyes-free interaction with keyboard fallback.</p>
+      <div id="statusBanner" class="status" role="status" aria-live="polite">Preparing voice guidance.</div>
+      <div class="pill-row">
+        <span class="pill">Two-way Voice Interaction</span>
+        <span class="pill">Audio Progress Feedback</span>
+        <span class="pill">Voice Quiz</span>
+        <span class="pill">No Silent Actions</span>
+      </div>
+      <div class="controls" aria-label="Keyboard fallback controls">
+        <button id="startAssistantBtn" class="btn-accent">Start Voice Assistant</button>
+        <button id="startLessonBtn">Start Lesson</button>
+        <button id="nextBtn">Next</button>
+        <button id="repeatBtn">Repeat</button>
+        <button id="playPauseBtn">Pause</button>
+        <button id="fasterBtn">Increase Speed</button>
+        <button id="explainDiagramBtn">Explain Diagram</button>
+        <button id="quizBtn">Start Quiz</button>
+      </div>
+      <p class="sub" style="margin-top:10px;">
+        Keyboard fallback: <span class="kbd">Alt</span>+<span class="kbd">S</span> start assistant,
+        <span class="kbd">Alt</span>+<span class="kbd">L</span> start lesson,
+        <span class="kbd">Alt</span>+<span class="kbd">N</span> next,
+        <span class="kbd">Alt</span>+<span class="kbd">R</span> repeat,
+        <span class="kbd">Alt</span>+<span class="kbd">P</span> play/pause,
+        <span class="kbd">Alt</span>+<span class="kbd">Q</span> quiz.
+      </p>
+    </section>
+
+    <section class="main">
+      <article class="panel" aria-labelledby="lesson-heading">
+        <h2 id="lesson-heading" class="title" style="font-size:1.12rem;">Audio Lesson Flow</h2>
+        <div id="lessonList" class="list"></div>
+        <figure>
+          <img
+            src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='1200' height='420'><defs><linearGradient id='g' x1='0' x2='1'><stop offset='0' stop-color='%2307101c'/><stop offset='1' stop-color='%2318293e'/></linearGradient></defs><rect width='1200' height='420' fill='url(%23g)'/><rect x='60' y='130' width='220' height='150' rx='16' fill='%232c4e6b' stroke='%2379c2ff'/><rect x='350' y='130' width='220' height='150' rx='16' fill='%232c4e6b' stroke='%2379c2ff'/><rect x='640' y='130' width='220' height='150' rx='16' fill='%232c4e6b' stroke='%2379c2ff'/><rect x='930' y='130' width='210' height='150' rx='16' fill='%232c4e6b' stroke='%2379c2ff'/><text x='92' y='198' fill='white' font-size='30' font-family='Arial'>Input</text><text x='94' y='232' fill='white' font-size='30' font-family='Arial'>Access</text><text x='372' y='198' fill='white' font-size='30' font-family='Arial'>Caption</text><text x='380' y='232' fill='white' font-size='30' font-family='Arial'>Context</text><text x='662' y='198' fill='white' font-size='30' font-family='Arial'>Concept</text><text x='680' y='232' fill='white' font-size='30' font-family='Arial'>Emphasis</text><text x='955' y='198' fill='white' font-size='30' font-family='Arial'>Quiz</text><text x='949' y='232' fill='white' font-size='30' font-family='Arial'>Interaction</text><line x1='280' y1='205' x2='350' y2='205' stroke='%2379c2ff' stroke-width='8'/><line x1='570' y1='205' x2='640' y2='205' stroke='%2379c2ff' stroke-width='8'/><line x1='860' y1='205' x2='930' y2='205' stroke='%2379c2ff' stroke-width='8'/></svg>"
+            alt="Diagram showing four connected learning stages: Input Access, Caption Context, Concept Emphasis, and Quiz Interaction."
+          />
+          <figcaption>Voice command: "Explain the image" or "Describe the diagram again".</figcaption>
+        </figure>
+      </article>
+
+      <aside class="panel" aria-labelledby="voice-heading">
+        <h2 id="voice-heading" class="title" style="font-size:1.12rem;">Voice Command Log</h2>
+        <div id="voiceLog" class="list"></div>
+      </aside>
+    </section>
+
+    <div id="ariaAnnouncements" class="sr-only" aria-live="assertive" aria-atomic="true"></div>
+  </main>
+
+  <script>
+    (function() {
+      const statusBanner = document.getElementById('statusBanner');
+      const ariaAnnouncements = document.getElementById('ariaAnnouncements');
+      const lessonList = document.getElementById('lessonList');
+      const voiceLog = document.getElementById('voiceLog');
+
+      const startAssistantBtn = document.getElementById('startAssistantBtn');
+      const startLessonBtn = document.getElementById('startLessonBtn');
+      const nextBtn = document.getElementById('nextBtn');
+      const repeatBtn = document.getElementById('repeatBtn');
+      const playPauseBtn = document.getElementById('playPauseBtn');
+      const fasterBtn = document.getElementById('fasterBtn');
+      const explainDiagramBtn = document.getElementById('explainDiagramBtn');
+      const quizBtn = document.getElementById('quizBtn');
+
+      const lessonSections = [
+        {
+          title: 'Step 1: Input and Access',
+          lines: [
+            'Content enters through the lecture stream and is transformed into visible text and prompts.',
+            'Inclusive multimodal learning preserves the same concept while changing presentation format.'
+          ]
+        },
+        {
+          title: 'Step 2: Caption and Context',
+          lines: [
+            'Same concept from the lecture is shown in high-contrast captions and transcript lines.',
+            'Captions, transcripts, visual cues, and haptic events deliver equivalent instructional meaning.'
+          ]
+        },
+        {
+          title: 'Step 3: Concept Emphasis',
+          lines: [
+            'Key moments trigger a visual banner and optional vibration without any reliance on sound.',
+            'This keeps the educational meaning unchanged while improving access.'
+          ]
+        },
+        {
+          title: 'Step 4: Assessment Prompt',
+          lines: [
+            'Quiz interactions appear as visual notifications with optional triple vibration feedback.',
+            'The learner can answer with voice or keyboard and receive immediate spoken feedback.'
+          ]
+        }
+      ];
+
+      const diagramExplanation =
+        'The diagram has four connected blocks. Block one is Input Access. Block two is Caption Context. Block three is Concept Emphasis. Block four is Quiz Interaction. The arrows show a continuous learning cycle with the same instructional meaning presented through accessible channels.';
+
+      const quizQuestions = [
+        {
+          question: 'Question 1. Which statement matches the lesson? Option A. Same concept, different presentation format. Option B. Different concept, same presentation. Option C. No transcript support.',
+          correct: 'a',
+          feedback: 'Correct. The system keeps concepts the same and changes presentation format for accessibility.'
+        },
+        {
+          question: 'Question 2. Which stage follows Caption Context? Option A. Input Access. Option B. Concept Emphasis. Option C. Logout.',
+          correct: 'b',
+          feedback: 'Correct. Concept Emphasis follows Caption Context.'
+        }
+      ];
+
+      const qaKnowledge = {
+        accessibility: 'Input accessibility means learners can receive and control lesson flow through channels that match their needs, without changing learning goals.',
+        captions: 'Caption and context means the same lecture meaning appears in synchronized text so learners can review details with precision.',
+        transcript: 'Transcript review flow lets learners search, revisit, and retain the same lesson meaning at their own pace.',
+        quiz: 'Quiz interaction checks understanding and gives immediate feedback while keeping interaction accessible through voice and keyboard.'
+      };
+
+      let speechRate = 1;
+      let sectionIndex = 0;
+      let sentenceIndex = 0;
+      let lessonStarted = false;
+      let isPaused = false;
+      let lastSentence = '';
+      let lastTopic = 'accessibility';
+      let listening = false;
+      let quizActive = false;
+      let quizIndex = 0;
+
+      const RecognitionAPI = window.SpeechRecognition || window.webkitSpeechRecognition;
+      const recognition = RecognitionAPI ? new RecognitionAPI() : null;
+
+      if (recognition) {
+        recognition.lang = 'en-US';
+        recognition.continuous = true;
+        recognition.interimResults = false;
+
+        recognition.onstart = () => {
+          listening = true;
+          setStatus('Voice recognition is listening. Say: hello, start lesson, next, repeat, pause, play, explain the image, start quiz.', '');
+        };
+
+        recognition.onresult = (event) => {
+          const result = event.results[event.results.length - 1];
+          const text = String(result[0].transcript || '').trim();
+          if (!text) return;
+          logVoice('Heard', text);
+          handleCommand(text);
+        };
+
+        recognition.onerror = (event) => {
+          setStatus('Voice recognition error: ' + event.error, 'error');
+          speak('Voice recognition error. You can continue with keyboard shortcuts.');
+        };
+
+        recognition.onend = () => {
+          listening = false;
+          if (lessonStarted) {
+            startListening(true);
+          }
+        };
+      }
+
+      function renderLessonList() {
+        lessonList.innerHTML = '';
+        lessonSections.forEach((section, idx) => {
+          const el = document.createElement('div');
+          el.className = 'item';
+          el.innerHTML = '<strong>' + section.title + '</strong><br>' + section.lines.join(' ');
+          if (idx === sectionIndex && lessonStarted) {
+            el.style.borderColor = '#4c88be';
+          }
+          lessonList.appendChild(el);
+        });
+      }
+
+      function logVoice(type, text) {
+        const line = document.createElement('div');
+        line.className = 'item';
+        line.innerHTML = '<strong>' + type + ':</strong> ' + text;
+        voiceLog.prepend(line);
+        const rows = Array.from(voiceLog.querySelectorAll('.item'));
+        if (rows.length > 12) {
+          rows.slice(12).forEach((n) => n.remove());
+        }
+      }
+
+      function setStatus(text, tone) {
+        statusBanner.textContent = text;
+        statusBanner.classList.remove('warn', 'error');
+        if (tone) {
+          statusBanner.classList.add(tone);
+        }
+        ariaAnnouncements.textContent = text;
+      }
+
+      function speak(text, interrupt) {
+        if (!window.speechSynthesis) {
+          setStatus('Speech output is not supported in this browser.', 'error');
+          return;
+        }
+        if (!text) return;
+        let shouldResumeListening = false;
+        if (recognition && listening) {
+          shouldResumeListening = true;
+          try {
+            recognition.stop();
+          } catch (_err) {}
+        }
+        if (interrupt) {
+          window.speechSynthesis.cancel();
+        }
+        const utter = new SpeechSynthesisUtterance(text);
+        utter.rate = speechRate;
+        utter.pitch = 1;
+        utter.lang = 'en-US';
+        utter.onstart = () => { isPaused = false; playPauseBtn.textContent = 'Pause'; };
+        utter.onend = () => {
+          if (shouldResumeListening) {
+            startListening(true);
+          }
+        };
+        window.speechSynthesis.speak(utter);
+      }
+
+      function progressAnnouncement() {
+        const total = lessonSections.reduce((sum, s) => sum + s.lines.length, 0);
+        const done = lessonSections.slice(0, sectionIndex).reduce((sum, s) => sum + s.lines.length, 0) + sentenceIndex + 1;
+        const pct = Math.min(100, Math.round((done / total) * 100));
+        return 'Lesson progress ' + pct + ' percent.';
+      }
+
+      function currentSentence() {
+        return lessonSections[sectionIndex].lines[sentenceIndex];
+      }
+
+      function startLesson() {
+        lessonStarted = true;
+        sectionIndex = 0;
+        sentenceIndex = 0;
+        quizActive = false;
+        renderLessonList();
+        const message =
+          'Starting lesson. You are in ' + lessonSections[sectionIndex].title + '. ' + currentSentence() + ' ' + progressAnnouncement();
+        lastSentence = currentSentence();
+        setStatus('Lesson started. ' + progressAnnouncement(), '');
+        speak(message, true);
+      }
+
+      function goNext() {
+        if (!lessonStarted) {
+          speak('Lesson has not started. Say start lesson.', true);
+          setStatus('Say start lesson first.', 'warn');
+          return;
+        }
+
+        const section = lessonSections[sectionIndex];
+        if (sentenceIndex < section.lines.length - 1) {
+          sentenceIndex += 1;
+        } else if (sectionIndex < lessonSections.length - 1) {
+          sectionIndex += 1;
+          sentenceIndex = 0;
+          speak('Section changed. ' + lessonSections[sectionIndex].title + '.', true);
+        } else {
+          setStatus('Lesson section finished. You can start quiz.', '');
+          speak('Lesson complete. Quiz starts next if you say start quiz.', true);
+          return;
+        }
+
+        renderLessonList();
+        lastSentence = currentSentence();
+        const line = currentSentence() + ' ' + progressAnnouncement();
+        setStatus('Moved to next point. ' + progressAnnouncement(), '');
+        speak(line, true);
+      }
+
+      function repeatSentence() {
+        if (!lastSentence) {
+          speak('Nothing to repeat yet. Say start lesson.', true);
+          return;
+        }
+        setStatus('Repeating the last sentence.', '');
+        speak(lastSentence, true);
+      }
+
+      function togglePausePlay() {
+        if (!window.speechSynthesis) return;
+
+        if (!isPaused) {
+          window.speechSynthesis.cancel();
+          isPaused = true;
+          playPauseBtn.textContent = 'Play';
+          setStatus('Speech paused.', '');
+          speak('Playback paused.', true);
+          return;
+        }
+
+        isPaused = false;
+        playPauseBtn.textContent = 'Pause';
+        setStatus('Speech resumed.', '');
+        if (lastSentence) {
+          speak('Playback resumed. ' + lastSentence, true);
+          return;
+        }
+        speak('Playback resumed.', true);
+      }
+
+      function increaseSpeed() {
+        speechRate = Math.min(1.8, +(speechRate + 0.15).toFixed(2));
+        const msg = 'Speech speed is now ' + speechRate.toFixed(2) + ' times normal.';
+        setStatus(msg, '');
+        speak(msg, true);
+      }
+
+      function explainDiagram() {
+        setStatus('Diagram explanation started.', '');
+        speak(diagramExplanation, true);
+      }
+
+      function answerQuestion(raw) {
+        if (!quizActive) {
+          speak('Quiz is not active. Say start quiz.', true);
+          return;
+        }
+
+        const normalized = normalize(raw);
+        const match = normalized.match(/option\s*([abc])|^([abc])$/);
+        if (!match) {
+          speak('Please answer with Option A, Option B, or Option C.', true);
+          return;
+        }
+        const answer = (match[1] || match[2] || '').toLowerCase();
+        const q = quizQuestions[quizIndex];
+
+        if (answer === q.correct) {
+          speak(q.feedback, true);
+          quizIndex += 1;
+          if (quizIndex >= quizQuestions.length) {
+            quizActive = false;
+            setStatus('Quiz ended. All questions completed.', '');
+            speak('Quiz ended. You completed all questions.', true);
+            return;
+          }
+          setStatus('Quiz progress: question ' + (quizIndex + 1) + ' of ' + quizQuestions.length + '.', '');
+          speak('Next question. ' + quizQuestions[quizIndex].question, true);
+          return;
+        }
+
+        speak('Incorrect. Try again. ' + q.question, true);
+      }
+
+      function startQuiz() {
+        quizActive = true;
+        quizIndex = 0;
+        setStatus('Quiz started. Question 1 of ' + quizQuestions.length + '.', '');
+        speak('Quiz start. ' + quizQuestions[quizIndex].question, true);
+      }
+
+      function answerQuestionByMeaning(question) {
+        const q = normalize(question);
+        if (q.includes('more') || q.includes('again') || q.includes('follow up')) {
+          return qaKnowledge[lastTopic];
+        }
+        if (q.includes('caption') || q.includes('context')) {
+          lastTopic = 'captions';
+          return qaKnowledge.captions;
+        }
+        if (q.includes('transcript') || q.includes('review')) {
+          lastTopic = 'transcript';
+          return qaKnowledge.transcript;
+        }
+        if (q.includes('quiz') || q.includes('assessment')) {
+          lastTopic = 'quiz';
+          return qaKnowledge.quiz;
+        }
+        lastTopic = 'accessibility';
+        return qaKnowledge.accessibility;
+      }
+
+      function normalize(text) {
+        return String(text || '').trim().toLowerCase().replace(/[^a-z0-9\s]/g, ' ').replace(/\s+/g, ' ');
+      }
+
+      function startListening(silentRetry) {
+        if (!recognition) {
+          setStatus('Voice recognition is not supported here. Use keyboard fallback controls.', 'error');
+          if (!silentRetry) speak('Voice recognition is not supported in this browser. Use keyboard shortcuts.', true);
+          return;
+        }
+
+        if (listening) return;
+        try {
+          recognition.start();
+          if (!silentRetry) {
+            speak('Voice assistant started. Say hello, start lesson, next, repeat, pause, play, or start quiz.', true);
+          }
+        } catch (_err) {
+          if (!silentRetry) {
+            setStatus('Voice recognition could not start yet. Try Start Voice Assistant again.', 'warn');
+            speak('Voice recognition could not start yet. Try again.', true);
+          }
+        }
+      }
+
+      function handleCommand(rawText) {
+        const text = normalize(rawText);
+
+        if (text === 'hello' || text.includes('hello')) {
+          const msg = 'Hello. You are in Blind Learning Mode. Say start lesson to begin, or say explain the image.';
+          setStatus('Greeting command received.', '');
+          speak(msg, true);
+          return;
+        }
+
+        if (text.includes('start lesson') || text === 'start') {
+          startLesson();
+          return;
+        }
+
+        if (text === 'next' || text.includes('next section') || text.includes('go next')) {
+          goNext();
+          return;
+        }
+
+        if (text === 'repeat' || text.includes('repeat last sentence')) {
+          repeatSentence();
+          return;
+        }
+
+        if (text === 'pause') {
+          togglePausePlay();
+          return;
+        }
+
+        if (text === 'play' || text === 'resume') {
+          togglePausePlay();
+          return;
+        }
+
+        if (text.includes('increase speed') || text.includes('faster')) {
+          increaseSpeed();
+          return;
+        }
+
+        if (text.includes('explain the image') || text.includes('describe the diagram again') || text.includes('describe diagram')) {
+          explainDiagram();
+          return;
+        }
+
+        if (text.includes('start quiz') || text === 'quiz') {
+          startQuiz();
+          return;
+        }
+
+        if (text.includes('option a') || text.includes('option b') || text.includes('option c') || text === 'a' || text === 'b' || text === 'c') {
+          answerQuestion(text);
+          return;
+        }
+
+        if (text.startsWith('ask ') || text.startsWith('question ') || text.includes('what') || text.includes('how') || text.includes('why')) {
+          const response = answerQuestionByMeaning(text.replace(/^ask\s+/, '').replace(/^question\s+/, ''));
+          setStatus('Question answered by voice.', '');
+          speak(response, true);
+          return;
+        }
+
+        const fallback = 'Command not recognized. Try: start lesson, next, repeat, pause, play, explain the image, or start quiz.';
+        setStatus(fallback, 'warn');
+        speak(fallback, true);
+      }
+
+      startAssistantBtn.addEventListener('click', () => startListening(false));
+      startLessonBtn.addEventListener('click', startLesson);
+      nextBtn.addEventListener('click', goNext);
+      repeatBtn.addEventListener('click', repeatSentence);
+      playPauseBtn.addEventListener('click', togglePausePlay);
+      fasterBtn.addEventListener('click', increaseSpeed);
+      explainDiagramBtn.addEventListener('click', explainDiagram);
+      quizBtn.addEventListener('click', startQuiz);
+
+      window.addEventListener('keydown', (e) => {
+        if (!e.altKey) return;
+        const key = String(e.key || '').toLowerCase();
+        if (key === 's') { e.preventDefault(); startListening(false); }
+        if (key === 'l') { e.preventDefault(); startLesson(); }
+        if (key === 'n') { e.preventDefault(); goNext(); }
+        if (key === 'r') { e.preventDefault(); repeatSentence(); }
+        if (key === 'p') { e.preventDefault(); togglePausePlay(); }
+        if (key === 'q') { e.preventDefault(); startQuiz(); }
+        if (key === 'a' || key === 'b' || key === 'c') { e.preventDefault(); answerQuestion('option ' + key); }
+      });
+
+      renderLessonList();
+      logVoice('System', 'Ready. Waiting for command.');
+
+      const onboarding =
+        'You are now in Blind Learning Mode. This page supports voice-first navigation. Say hello, start lesson, next, repeat, pause, play, explain the image, or start quiz.';
+      setStatus('Page loaded. Spoken guidance started.', '');
+      speak(onboarding, true);
+
+      setTimeout(() => {
+        startListening(true);
+        setTimeout(() => {
+          if (!lessonStarted) {
+            startLesson();
+          }
+        }, 900);
+      }, 700);
+    })();
+  </script>
+</body>
+</html>
