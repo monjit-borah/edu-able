@@ -16,9 +16,9 @@
 
 ## 📸 Platform Screenshots
 
-### 🔐 Login & Authentication Screen
-![Edu-Able Login](img/login.png)  
-*Secure login interface with OTP verification and accessibility mode selection.*
+### 🔐 Home Page
+![Edu-Able Login](img/home.png)  
+*Animated Home page*
 
 ---
 
