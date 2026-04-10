@@ -53,7 +53,7 @@
 ---
 
 ### ⚡ ADHD Focus Mode (Coming Soon)
-![ADHD Mode](img/comming.jpeg)  
+![ADHD Mode](img/adhd.png)  
 *Distraction-reduced interface with guided learning and focus support tools.*
 
 ---
