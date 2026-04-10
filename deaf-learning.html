@@ -529,9 +529,7 @@
           <div class="control-group">
             <label for="captionEngine">STT</label>
             <select id="captionEngine">
-              <option value="webspeech">Web Speech API (Live)</option>
-              <option value="whisper">OpenAI Whisper (Live API)</option>
-              <option value="deepspeech">Mozilla DeepSpeech (Stub)</option>
+              <option value="vosk">Vosk Browser (Offline Model)</option>
             </select>
           </div>
 
@@ -660,6 +658,7 @@
   <div id="toasts" class="toasts" aria-live="polite"></div>
 
   <script src="https://www.youtube.com/iframe_api"></script>
+  <script type="application/javascript" src="https://cdn.jsdelivr.net/npm/vosk-browser@0.0.5/dist/vosk.js"></script>
   <script>
     (function() {
       const captionLive = document.getElementById('captionLive');
@@ -694,11 +693,18 @@
 
       const lessonId = 'inclusive-main';
       let transcript = [];
-      let recognition = null;
-      let whisperRecorder = null;
-      let whisperStream = null;
-      let whisperTimesliceMs = 4500;
-      let isWhisperRecording = false;
+      const voskModelUrl = 'https://ccoreilly.github.io/vosk-browser/models/vosk-model-small-en-us-0.15.tar.gz';
+      let captionsShouldRun = false;
+      let voskModelPromise = null;
+      let voskModel = null;
+      let voskRecognizer = null;
+      let voskAudioContext = null;
+      let voskMediaStream = null;
+      let voskSourceNode = null;
+      let voskProcessorNode = null;
+      let voskSilenceGain = null;
+      let voskStarting = false;
+      let voskReady = false;
       let avatarInterval = null;
       let signInterval = null;
       let youTubePlayer = null;
@@ -808,6 +814,7 @@
       function addTranscript(text) {
         const clean = String(text || '').trim();
         if (!clean) return;
+        lastCaptionEventAt = Date.now();
         transcript.push({ time: ts(), text: clean });
         renderTranscript();
         syncAvatarFromCaption(clean);
@@ -923,196 +930,162 @@
         }
       }
 
-      async function blobToBase64(blob) {
-        const buffer = await blob.arrayBuffer();
-        let binary = '';
-        const bytes = new Uint8Array(buffer);
-        for (let i = 0; i < bytes.byteLength; i += 1) {
-          binary += String.fromCharCode(bytes[i]);
+
+
+
+
+      function normalizeMicError(err) {
+        const name = err && err.name ? err.name : '';
+        if (name === 'NotAllowedError' || name === 'SecurityError') {
+          return 'Microphone permission is blocked. Allow mic access in browser site settings.';
         }
-        return btoa(binary);
+        if (name === 'NotFoundError' || name === 'DevicesNotFoundError') {
+          return 'No microphone detected. Connect a mic and retry.';
+        }
+        if (name === 'NotReadableError' || name === 'TrackStartError') {
+          return 'Microphone is busy in another app. Close that app and retry.';
+        }
+        return (err && err.message) ? err.message : 'Microphone is unavailable.';
       }
 
-      async function transcribeChunkWithWhisper(blob) {
-        if (!blob || blob.size < 1200) return;
-        const audioBase64 = await blobToBase64(blob);
-        const response = await fetch('/api/whisper-transcribe', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            audioBase64,
-            mimeType: blob.type || 'audio/webm'
-          })
-        });
-
-        const data = await response.json().catch(() => ({}));
-        if (!response.ok) {
-          throw new Error(data.message || 'Whisper transcription failed.');
+      async function loadVoskModel() {
+        if (!window.Vosk || typeof window.Vosk.createModel !== 'function') {
+          throw new Error('Vosk browser library did not load.');
         }
-
-        const text = String(data.text || '').trim();
-        if (text) {
-          addTranscript(text);
-          setCaptionText(text);
+        if (!voskModelPromise) {
+          captionStatus.textContent = 'Loading model';
+          sttInfo.textContent = 'Source: Downloading Vosk model (~40MB first time).';
+          setCaptionText('Loading Vosk speech model for offline captions...');
+          voskModelPromise = window.Vosk.createModel(voskModelUrl);
         }
+        voskModel = await voskModelPromise;
+        return voskModel;
       }
 
-      async function startWhisperCaptions() {
-        if (isWhisperRecording) {
-          showToast('Whisper captions already running.', 'warn');
-          return;
+      function teardownVoskSession() {
+        if (voskSourceNode) {
+          try { voskSourceNode.disconnect(); } catch (_err) {}
+          voskSourceNode = null;
         }
-
-        if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
-          showToast('Microphone capture is not supported.', 'error');
-          captionStatus.textContent = 'Mic unsupported';
-          updateDots();
-          return;
+        if (voskProcessorNode) {
+          voskProcessorNode.onaudioprocess = null;
+          try { voskProcessorNode.disconnect(); } catch (_err) {}
+          voskProcessorNode = null;
         }
-
-        whisperStream = await navigator.mediaDevices.getUserMedia({ audio: true });
-        const mimeCandidates = ['audio/webm;codecs=opus', 'audio/webm', 'audio/mp4'];
-        const chosenMime = mimeCandidates.find((m) => window.MediaRecorder && MediaRecorder.isTypeSupported(m));
-        whisperRecorder = chosenMime
-          ? new MediaRecorder(whisperStream, { mimeType: chosenMime })
-          : new MediaRecorder(whisperStream);
-        isWhisperRecording = true;
-
-        captionStatus.textContent = 'Listening (Whisper)';
-        sttInfo.textContent = 'Source: OpenAI Whisper via /api/whisper-transcribe';
-        updateDots();
-        showToast('Whisper captions started.', 'ok');
-
-        whisperRecorder.ondataavailable = async (event) => {
-          if (!event.data || !event.data.size) return;
-          try {
-            await transcribeChunkWithWhisper(event.data);
-          } catch (err) {
-            const msg = err.message || 'Whisper chunk failed.';
-            showToast(msg, 'error');
-            setBanner(msg, true);
-          }
-        };
-
-        whisperRecorder.onstop = () => {
-          isWhisperRecording = false;
-          captionStatus.textContent = 'Stopped';
-          updateDots();
-        };
-
-        whisperRecorder.start(whisperTimesliceMs);
+        if (voskSilenceGain) {
+          try { voskSilenceGain.disconnect(); } catch (_err) {}
+          voskSilenceGain = null;
+        }
+        if (voskMediaStream) {
+          voskMediaStream.getTracks().forEach((track) => track.stop());
+          voskMediaStream = null;
+        }
+        if (voskAudioContext) {
+          voskAudioContext.close().catch(() => {});
+          voskAudioContext = null;
+        }
+        if (voskRecognizer && typeof voskRecognizer.remove === 'function') {
+          try { voskRecognizer.remove(); } catch (_err) {}
+        }
+        voskRecognizer = null;
+        voskReady = false;
       }
 
-      function stopWhisperCaptions() {
-        if (whisperRecorder && whisperRecorder.state !== 'inactive') {
-          whisperRecorder.stop();
-        }
-        if (whisperStream) {
-          whisperStream.getTracks().forEach((t) => t.stop());
-        }
-        whisperRecorder = null;
-        whisperStream = null;
-        isWhisperRecording = false;
-      }
-
-      function initSpeechRecognition() {
-        const mode = captionEngine.value;
-
-        if (mode === 'deepspeech') {
-          captionStatus.textContent = 'DeepSpeech stub active';
-          sttInfo.textContent = 'Source: Mozilla DeepSpeech stub (local model service required).';
-          setCaptionText('DeepSpeech mode selected. Connect local inference service.');
-          showToast('DeepSpeech selected: local model service needed.', 'warn');
-          updateDots();
-          return false;
-        }
-
-        const API = window.SpeechRecognition || window.webkitSpeechRecognition;
-        if (!API) {
-          captionStatus.textContent = 'Unsupported browser';
-          sttInfo.textContent = 'Source: Web Speech unavailable in this browser.';
-          setCaptionText('Live captions are not supported here. Use Chrome or Edge.');
-          showToast('Web Speech API is unavailable.', 'error');
-          updateDots();
-          return false;
-        }
-
-        recognition = new API();
-        recognition.continuous = true;
-        recognition.interimResults = true;
-        recognition.lang = 'en-US';
-
-        recognition.onstart = () => {
-          captionStatus.textContent = 'Listening';
-          sttInfo.textContent = 'Source: Web Speech API (microphone)';
-          showToast('Live captions started.', 'ok');
-          updateDots();
-        };
-
-        recognition.onend = () => {
-          captionStatus.textContent = 'Stopped';
-          updateDots();
-        };
-
-        recognition.onerror = (event) => {
-          captionStatus.textContent = 'Error: ' + event.error;
-          showToast('Caption error: ' + event.error, 'error');
-          updateDots();
-        };
-
-        recognition.onresult = (event) => {
-          let interim = '';
-          for (let i = event.resultIndex; i < event.results.length; i += 1) {
-            const result = event.results[i];
-            const text = result[0].transcript;
-            if (result.isFinal) {
-              addTranscript(text);
-            } else {
-              interim += text + ' ';
-            }
-          }
-
-          const lastFinal = transcript.length ? transcript[transcript.length - 1].text : '';
-          setCaptionText(interim.trim() || lastFinal);
-        };
-
-        return true;
-      }
-
-      function startCaptions() {
-        const mode = captionEngine.value;
-
-        if (mode === 'whisper') {
-          stopCaptions();
-          startWhisperCaptions().catch((err) => {
-            const msg = err.message || 'Unable to start Whisper captions.';
-            showToast(msg, 'error');
-            setBanner(msg, true);
-          });
-          return;
-        }
-
-        if (mode !== 'webspeech') {
-          recognition = null;
-          initSpeechRecognition();
-          return;
-        }
-
-        if (!recognition && !initSpeechRecognition()) return;
+      async function startCaptions() {
+        if (voskStarting || voskReady) return;
+        captionsShouldRun = true;
+        voskStarting = true;
 
         try {
-          recognition.start();
-        } catch (_e) {
-          showToast('Caption engine already running.', 'warn');
+          const model = await loadVoskModel();
+          if (!captionsShouldRun) return;
+
+          const mediaStream = await navigator.mediaDevices.getUserMedia({
+            video: false,
+            audio: {
+              echoCancellation: true,
+              noiseSuppression: true,
+              channelCount: 1,
+              sampleRate: 16000
+            }
+          });
+          if (!captionsShouldRun) {
+            mediaStream.getTracks().forEach((track) => track.stop());
+            return;
+          }
+
+          const AudioContextCtor = window.AudioContext || window.webkitAudioContext;
+          if (!AudioContextCtor) {
+            throw new Error('AudioContext is not supported in this browser.');
+          }
+
+          voskMediaStream = mediaStream;
+          voskAudioContext = new AudioContextCtor();
+          await voskAudioContext.resume();
+
+          voskRecognizer = new model.KaldiRecognizer(voskAudioContext.sampleRate);
+          voskRecognizer.on('result', (message) => {
+            const text = message && message.result ? message.result.text : '';
+            if (!text) return;
+            addTranscript(text);
+            setCaptionText(text);
+            captionStatus.textContent = 'Listening';
+            sttInfo.textContent = 'Source: Vosk browser recognizer (final result)';
+            updateDots();
+          });
+          voskRecognizer.on('partialresult', (message) => {
+            const partial = message && message.result ? message.result.partial : '';
+            if (!partial) return;
+            setCaptionText(partial);
+            captionStatus.textContent = 'Listening';
+            sttInfo.textContent = 'Source: Vosk browser recognizer (partial result)';
+            updateDots();
+          });
+
+          voskProcessorNode = voskAudioContext.createScriptProcessor(4096, 1, 1);
+          voskProcessorNode.onaudioprocess = (event) => {
+            if (!voskRecognizer || !captionsShouldRun) return;
+            try {
+              voskRecognizer.acceptWaveform(event.inputBuffer);
+            } catch (error) {
+              console.error('Vosk acceptWaveform failed', error);
+            }
+          };
+
+          voskSourceNode = voskAudioContext.createMediaStreamSource(voskMediaStream);
+          voskSilenceGain = voskAudioContext.createGain();
+          voskSilenceGain.gain.value = 0;
+
+          voskSourceNode.connect(voskProcessorNode);
+          voskProcessorNode.connect(voskSilenceGain);
+          voskSilenceGain.connect(voskAudioContext.destination);
+
+          voskReady = true;
+          captionStatus.textContent = 'Listening';
+          sttInfo.textContent = 'Source: Vosk browser recognizer ready';
+          showToast('Vosk captions started.', 'ok');
+          updateDots();
+        } catch (err) {
+          const msg = normalizeMicError(err);
+          teardownVoskSession();
+          captionsShouldRun = false;
+          captionStatus.textContent = 'Mic error';
+          sttInfo.textContent = 'Source: Vosk could not start.';
+          setCaptionText('Captions will appear here.');
+          setBanner(msg, true);
+          showToast(msg, 'error');
+          updateDots();
+        } finally {
+          voskStarting = false;
         }
       }
 
       function stopCaptions() {
-        if (recognition) {
-          recognition.stop();
-        }
-        stopWhisperCaptions();
+        captionsShouldRun = false;
+        voskStarting = false;
+        teardownVoskSession();
         captionStatus.textContent = 'Stopped';
+        sttInfo.textContent = 'Source: Waiting for start.';
         updateDots();
       }
 
@@ -1187,7 +1160,6 @@
       stopCaptionBtn.addEventListener('click', stopCaptions);
       captionEngine.addEventListener('change', () => {
         stopCaptions();
-        recognition = null;
         setCaptionText('Captions will appear here.');
         captionStatus.textContent = 'Idle';
         sttInfo.textContent = 'Source: Waiting for start.';
@@ -1239,6 +1211,7 @@
       });
 
       window.addEventListener('beforeunload', saveTranscriptLocal);
+      window.addEventListener('beforeunload', teardownVoskSession);
 
       applyCaptionPreferences();
       initVisualCards();
@@ -1247,6 +1220,8 @@
       setupKeyboardShortcuts();
       updateDots();
       enforceAvatarPlayback();
+      captionEngine.value = 'vosk';
+      sttInfo.textContent = 'Source: Vosk browser recognizer ready. First start downloads the small English model.';
 
       // Same content, different format seed text.
       addTranscript('Inclusive multimodal learning preserves the same concept while changing presentation format.');

@@ -10,6 +10,7 @@ require("dotenv").config();
 const app = express();
 
 const PORT = Number(process.env.PORT || 3000);
+const IS_PRODUCTION = process.env.NODE_ENV === "production";
 const OTP_SECRET = process.env.OTP_SECRET;
 const OTP_EXPIRES_MINUTES = Number(process.env.OTP_EXPIRES_MINUTES || 5);
 const OTP_RESEND_COOLDOWN_SECONDS = Number(
@@ -32,7 +33,8 @@ app.use("/exam", express.static(path.join(__dirname, "pages/exam")));
 
 const sendOtpLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
-  max: 10,
+  // In local development, avoid locking out the login UI while testing.
+  max: IS_PRODUCTION ? 10 : 1000,
   standardHeaders: true,
   legacyHeaders: false,
   message: { message: "Too many OTP requests. Try again later." }
@@ -125,23 +127,45 @@ app.post("/send-otp", sendOtpLimiter, async (req, res) => {
     let mailTransporter;
     try {
       mailTransporter = createTransporter();
-    } catch (_err) {
-      return res.status(500).json({
-        message:
-          "Email service is not configured. Add SMTP credentials in .env."
+    } catch (err) {
+      if (IS_PRODUCTION) {
+        return res.status(500).json({
+          message:
+            "Email service is not configured. Add SMTP credentials in .env."
+        });
+      }
+      console.warn("send-otp: SMTP is not configured in development mode.");
+      console.warn(err?.message || err);
+    }
+
+    if (!mailTransporter) {
+      console.log(`[DEV OTP] ${email}: ${otp}`);
+      return res.json({
+        message: "OTP generated in development mode. Check server logs."
       });
     }
 
     const fromEmail = process.env.SMTP_FROM || process.env.SMTP_USER;
-    await mailTransporter.sendMail({
-      from: fromEmail,
-      to: email,
-      subject: "Your OTP for Login Verification",
-      text: `Your OTP is ${otp}. It will expire in ${OTP_EXPIRES_MINUTES} minutes.`,
-      html: `<p>Your OTP is <b>${otp}</b>.</p><p>It will expire in ${OTP_EXPIRES_MINUTES} minutes.</p>`
-    });
-
-    return res.json({ message: "OTP sent successfully" });
+    try {
+      await mailTransporter.sendMail({
+        from: fromEmail,
+        to: email,
+        subject: "Your OTP for Login Verification",
+        text: `Your OTP is ${otp}. It will expire in ${OTP_EXPIRES_MINUTES} minutes.`,
+        html: `<p>Your OTP is <b>${otp}</b>.</p><p>It will expire in ${OTP_EXPIRES_MINUTES} minutes.</p>`
+      });
+      return res.json({ message: "OTP sent successfully" });
+    } catch (err) {
+      if (IS_PRODUCTION) {
+        throw err;
+      }
+      console.warn("send-otp: SMTP send failed in development mode.");
+      console.warn(err?.message || err);
+      console.log(`[DEV OTP] ${email}: ${otp}`);
+      return res.json({
+        message: "OTP generated in development mode. Check server logs."
+      });
+    }
   } catch (error) {
     console.error("send-otp error:", error);
     return res.status(500).json({ message: "Failed to send OTP. Try again." });
@@ -257,6 +281,14 @@ app.get("/api/whisper-health", (_req, res) => {
 
 app.get("/health", (_req, res) => {
   res.json({ ok: true });
+});
+
+app.get("/", (_req, res) => {
+  res.sendFile(path.join(__dirname, "index.html"));
+});
+
+app.get("/login", (_req, res) => {
+  res.sendFile(path.join(__dirname, "login.html"));
 });
 
 app.listen(PORT, () => {

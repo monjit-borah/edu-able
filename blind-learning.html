@@ -234,6 +234,7 @@
     <div id="ariaAnnouncements" class="sr-only" aria-live="assertive" aria-atomic="true"></div>
   </main>
 
+  <script type="application/javascript" src="https://cdn.jsdelivr.net/npm/vosk-browser@0.0.5/dist/vosk.js"></script>
   <script>
     (function() {
       const statusBanner = document.getElementById('statusBanner');
@@ -303,6 +304,37 @@
         transcript: 'Transcript review flow lets learners search, revisit, and retain the same lesson meaning at their own pace.',
         quiz: 'Quiz interaction checks understanding and gives immediate feedback while keeping interaction accessible through voice and keyboard.'
       };
+      const commandGrammar = [
+        'hello',
+        'start lesson',
+        'start',
+        'next',
+        'next section',
+        'go next',
+        'repeat',
+        'repeat last sentence',
+        'pause',
+        'play',
+        'resume',
+        'increase speed',
+        'faster',
+        'explain the image',
+        'describe the diagram again',
+        'describe diagram',
+        'start quiz',
+        'quiz',
+        'option a',
+        'option b',
+        'option c',
+        'a',
+        'b',
+        'c',
+        'what is accessibility',
+        'what is caption context',
+        'what is transcript review flow',
+        'what is quiz interaction',
+        '[unk]'
+      ];
 
       let speechRate = 1;
       let sectionIndex = 0;
@@ -314,39 +346,73 @@
       let listening = false;
       let quizActive = false;
       let quizIndex = 0;
+      const voskModelUrl = 'https://ccoreilly.github.io/vosk-browser/models/vosk-model-small-en-us-0.15.tar.gz';
+      let voskModelPromise = null;
+      let voskModel = null;
+      let voskRecognizer = null;
+      let voskAudioContext = null;
+      let voskMediaStream = null;
+      let voskSourceNode = null;
+      let voskProcessorNode = null;
+      let voskSilenceGain = null;
+      let voskStarting = false;
+      let heardPartial = '';
 
-      const RecognitionAPI = window.SpeechRecognition || window.webkitSpeechRecognition;
-      const recognition = RecognitionAPI ? new RecognitionAPI() : null;
+      function normalizeMicError(err) {
+        const name = err && err.name ? err.name : '';
+        if (name === 'NotAllowedError' || name === 'SecurityError') {
+          return 'Microphone permission is blocked. Allow mic access in browser site settings.';
+        }
+        if (name === 'NotFoundError' || name === 'DevicesNotFoundError') {
+          return 'No microphone detected. Connect a mic and retry.';
+        }
+        if (name === 'NotReadableError' || name === 'TrackStartError') {
+          return 'Microphone is busy in another app. Close that app and retry.';
+        }
+        return (err && err.message) ? err.message : 'Microphone is unavailable.';
+      }
 
-      if (recognition) {
-        recognition.lang = 'en-US';
-        recognition.continuous = true;
-        recognition.interimResults = false;
+      async function loadVoskModel() {
+        if (!window.Vosk || typeof window.Vosk.createModel !== 'function') {
+          throw new Error('Vosk browser library did not load.');
+        }
+        if (!voskModelPromise) {
+          setStatus('Loading offline voice model. This may take a moment on first use.', '');
+          voskModelPromise = window.Vosk.createModel(voskModelUrl);
+        }
+        voskModel = await voskModelPromise;
+        return voskModel;
+      }
 
-        recognition.onstart = () => {
-          listening = true;
-          setStatus('Voice recognition is listening. Say: hello, start lesson, next, repeat, pause, play, explain the image, start quiz.', '');
-        };
-
-        recognition.onresult = (event) => {
-          const result = event.results[event.results.length - 1];
-          const text = String(result[0].transcript || '').trim();
-          if (!text) return;
-          logVoice('Heard', text);
-          handleCommand(text);
-        };
-
-        recognition.onerror = (event) => {
-          setStatus('Voice recognition error: ' + event.error, 'error');
-          speak('Voice recognition error. You can continue with keyboard shortcuts.');
-        };
-
-        recognition.onend = () => {
-          listening = false;
-          if (lessonStarted) {
-            startListening(true);
-          }
-        };
+      function teardownListening() {
+        if (voskSourceNode) {
+          try { voskSourceNode.disconnect(); } catch (_err) {}
+          voskSourceNode = null;
+        }
+        if (voskProcessorNode) {
+          voskProcessorNode.onaudioprocess = null;
+          try { voskProcessorNode.disconnect(); } catch (_err) {}
+          voskProcessorNode = null;
+        }
+        if (voskSilenceGain) {
+          try { voskSilenceGain.disconnect(); } catch (_err) {}
+          voskSilenceGain = null;
+        }
+        if (voskMediaStream) {
+          voskMediaStream.getTracks().forEach((track) => track.stop());
+          voskMediaStream = null;
+        }
+        if (voskAudioContext) {
+          voskAudioContext.close().catch(() => {});
+          voskAudioContext = null;
+        }
+        if (voskRecognizer && typeof voskRecognizer.remove === 'function') {
+          try { voskRecognizer.remove(); } catch (_err) {}
+        }
+        voskRecognizer = null;
+        heardPartial = '';
+        listening = false;
+        voskStarting = false;
       }
 
       function renderLessonList() {
@@ -388,12 +454,9 @@
           return;
         }
         if (!text) return;
-        let shouldResumeListening = false;
-        if (recognition && listening) {
-          shouldResumeListening = true;
-          try {
-            recognition.stop();
-          } catch (_err) {}
+        const shouldResumeListening = listening;
+        if (shouldResumeListening) {
+          teardownListening();
         }
         if (interrupt) {
           window.speechSynthesis.cancel();
@@ -569,29 +632,116 @@
         return String(text || '').trim().toLowerCase().replace(/[^a-z0-9\s]/g, ' ').replace(/\s+/g, ' ');
       }
 
-      function startListening(silentRetry) {
-        if (!recognition) {
-          setStatus('Voice recognition is not supported here. Use keyboard fallback controls.', 'error');
-          if (!silentRetry) speak('Voice recognition is not supported in this browser. Use keyboard shortcuts.', true);
-          return;
-        }
+      function canonicalizeCommand(text) {
+        let normalized = normalize(text);
+        const replacements = [
+          ['starts lesson', 'start lesson'],
+          ['start the lesson', 'start lesson'],
+          ['go to next', 'next'],
+          ['next lesson', 'next'],
+          ['read again', 'repeat'],
+          ['repeat that', 'repeat'],
+          ['explain image', 'explain the image'],
+          ['describe image', 'explain the image'],
+          ['start the quiz', 'start quiz'],
+          ['question a', 'option a'],
+          ['question b', 'option b'],
+          ['question c', 'option c']
+        ];
 
-        if (listening) return;
-        try {
-          recognition.start();
-          if (!silentRetry) {
-            speak('Voice assistant started. Say hello, start lesson, next, repeat, pause, play, or start quiz.', true);
+        replacements.forEach(([from, to]) => {
+          if (normalized.includes(from)) {
+            normalized = normalized.replace(from, to);
           }
-        } catch (_err) {
-          if (!silentRetry) {
-            setStatus('Voice recognition could not start yet. Try Start Voice Assistant again.', 'warn');
-            speak('Voice recognition could not start yet. Try again.', true);
-          }
-        }
+        });
+
+        return normalized;
+      }
+
+      function startListening(silentRetry) {
+        if (listening || voskStarting) return;
+        voskStarting = true;
+        loadVoskModel()
+          .then((model) => {
+            return navigator.mediaDevices.getUserMedia({
+              video: false,
+              audio: {
+                echoCancellation: true,
+                noiseSuppression: true,
+                channelCount: 1,
+                sampleRate: 16000
+              }
+            }).then(async (mediaStream) => {
+              const AudioContextCtor = window.AudioContext || window.webkitAudioContext;
+              if (!AudioContextCtor) {
+                throw new Error('AudioContext is not supported in this browser.');
+              }
+
+              voskMediaStream = mediaStream;
+              try {
+                voskAudioContext = new AudioContextCtor({ sampleRate: 16000 });
+              } catch (_err) {
+                voskAudioContext = new AudioContextCtor();
+              }
+              await voskAudioContext.resume();
+
+              try {
+                voskRecognizer = new model.KaldiRecognizer(16000, JSON.stringify(commandGrammar));
+              } catch (_err) {
+                voskRecognizer = new model.KaldiRecognizer(voskAudioContext.sampleRate);
+              }
+              voskRecognizer.on('result', (message) => {
+                const text = message && message.result ? String(message.result.text || '').trim() : '';
+                if (!text) return;
+                heardPartial = '';
+                logVoice('Heard', text);
+                handleCommand(text);
+              });
+              voskRecognizer.on('partialresult', (message) => {
+                const partial = message && message.result ? String(message.result.partial || '').trim() : '';
+                if (!partial || partial === heardPartial) return;
+                heardPartial = partial;
+                setStatus('Listening for command: ' + partial, '');
+              });
+
+              voskProcessorNode = voskAudioContext.createScriptProcessor(4096, 1, 1);
+              voskProcessorNode.onaudioprocess = (event) => {
+                if (!voskRecognizer || !listening) return;
+                try {
+                  voskRecognizer.acceptWaveform(event.inputBuffer);
+                } catch (error) {
+                  console.error('Vosk acceptWaveform failed', error);
+                }
+              };
+
+              voskSourceNode = voskAudioContext.createMediaStreamSource(voskMediaStream);
+              voskSilenceGain = voskAudioContext.createGain();
+              voskSilenceGain.gain.value = 0;
+              voskSourceNode.connect(voskProcessorNode);
+              voskProcessorNode.connect(voskSilenceGain);
+              voskSilenceGain.connect(voskAudioContext.destination);
+
+              listening = true;
+              voskStarting = false;
+              setStatus('Voice assistant is actively listening. Use short commands like hello, start lesson, next, repeat, pause, play, explain the image, or start quiz.', '');
+
+              if (!silentRetry) {
+                speak('Voice assistant started. Say hello, start lesson, next, repeat, pause, play, or start quiz.', true);
+              }
+            });
+          })
+          .catch((err) => {
+            teardownListening();
+            const msg = normalizeMicError(err);
+            setStatus('Voice assistant could not start: ' + msg, 'error');
+            if (!silentRetry) {
+              speak('Voice assistant could not start. ' + msg, true);
+            }
+          });
       }
 
       function handleCommand(rawText) {
-        const text = normalize(rawText);
+        const text = canonicalizeCommand(rawText);
 
         if (text === 'hello' || text.includes('hello')) {
           const msg = 'Hello. You are in Blind Learning Mode. Say start lesson to begin, or say explain the image.';
@@ -677,6 +827,8 @@
         if (key === 'q') { e.preventDefault(); startQuiz(); }
         if (key === 'a' || key === 'b' || key === 'c') { e.preventDefault(); answerQuestion('option ' + key); }
       });
+
+      window.addEventListener('beforeunload', teardownListening);
 
       renderLessonList();
       logVoice('System', 'Ready. Waiting for command.');
