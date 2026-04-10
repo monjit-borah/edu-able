@@ -22,6 +22,12 @@
 
 ---
 
+### 🔐 Login & Authentication Screen
+![Edu-Able Login](img/login.png)  
+*Secure login interface with OTP verification and accessibility mode selection.*
+
+---
+
 ### 🧏 Deaf Learning Mode
 ![Deaf Mode](img/deaf.png)  
 *Accessible landing experience designed for deaf learners with visual-first navigation.*
