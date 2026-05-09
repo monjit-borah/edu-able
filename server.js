@@ -16,6 +16,7 @@ const OTP_EXPIRES_MINUTES = Number(process.env.OTP_EXPIRES_MINUTES || 5);
 const OTP_RESEND_COOLDOWN_SECONDS = Number(
   process.env.OTP_RESEND_COOLDOWN_SECONDS || 60
 );
+const YOUTUBE_API_KEY = process.env.YOUTUBE_API_KEY;
 const MAX_VERIFY_ATTEMPTS = 5;
 
 if (!OTP_SECRET) {
@@ -277,6 +278,60 @@ app.get("/api/whisper-health", (_req, res) => {
     configured,
     provider: "openai-whisper"
   });
+});
+
+app.get("/api/youtube-search", async (req, res) => {
+  try {
+    if (!YOUTUBE_API_KEY) {
+      return res.status(503).json({
+        message: "YOUTUBE_API_KEY is not configured."
+      });
+    }
+
+    const q = String(req.query.q || "").trim();
+    const pageToken = String(req.query.pageToken || "").trim();
+    const maxResults = Math.min(
+      12,
+      Math.max(1, Number(req.query.maxResults || 8))
+    );
+
+    if (!q) {
+      return res.status(400).json({ message: "q is required." });
+    }
+
+    const url = new URL("https://www.googleapis.com/youtube/v3/search");
+    url.searchParams.set("part", "snippet");
+    url.searchParams.set("type", "video");
+    url.searchParams.set("videoEmbeddable", "true");
+    url.searchParams.set("videoDuration", "short");
+    url.searchParams.set("maxResults", String(maxResults));
+    url.searchParams.set("q", q);
+    if (pageToken) {
+      url.searchParams.set("pageToken", pageToken);
+    }
+    url.searchParams.set("key", YOUTUBE_API_KEY);
+
+    const response = await fetch(url);
+    const rawBody = await response.text();
+    let data = {};
+    try {
+      data = rawBody ? JSON.parse(rawBody) : {};
+    } catch (_err) {
+      data = {};
+    }
+
+    if (!response.ok) {
+      return res.status(response.status).json({
+        message: data?.error?.message || `YouTube API HTTP ${response.status}`
+      });
+    }
+
+    return res.json(data);
+  } catch (error) {
+    return res.status(500).json({
+      message: error?.message || "YouTube search failed."
+    });
+  }
 });
 
 app.get("/health", (_req, res) => {

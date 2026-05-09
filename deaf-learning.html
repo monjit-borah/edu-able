@@ -6,25 +6,33 @@
   <title>Deaf Learning Mode</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Poppins:wght@500;600;700&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Sora:wght@500;600;700;800&display=swap" rel="stylesheet" />
+  <script type="module" src="https://unpkg.com/@splinetool/viewer@1.12.61/build/spline-viewer.js"></script>
   <style>
     :root {
-      --bg0: #030303;
-      --bg1: #0d0d0d;
-      --glass: rgba(19, 19, 19, 0.68);
-      --glass-2: rgba(13, 13, 13, 0.82);
-      --line: rgba(255, 255, 255, 0.08);
-      --line-bright: rgba(255, 255, 255, 0.2);
+      --bg0: #04070f;
+      --bg1: #0b1220;
+      --glass: rgba(20, 30, 48, 0.44);
+      --glass-2: rgba(9, 16, 30, 0.55);
+      --line: rgba(255, 255, 255, 0.28);
+      --line-bright: rgba(255, 255, 255, 0.5);
       --txt: #f1f1f1;
-      --txt-soft: #9ea5b4;
+      --txt-soft: #c2d0e2;
       --accent: #79c2ff;
       --ok: #6de3a4;
       --warn: #ffc46d;
       --danger: #ff8e8e;
       --caption-size: 28px;
-      --caption-font: Inter, sans-serif;
-      --radius: 22px;
-      --shadow: 0 35px 70px -26px rgba(0, 0, 0, 0.8);
+      --caption-font: "Sora", sans-serif;
+      --radius: 30px;
+      --shadow: 0 34px 84px -24px rgba(0, 0, 0, 0.66);
+      --font-ui: "Manrope", sans-serif;
+      --font-display: "Sora", sans-serif;
+      --btn-top: #2c89d6;
+      --btn-bottom: #0c3f73;
+      --btn-glow: rgba(121, 194, 255, 0.38);
+      --morph-edge: rgba(255, 255, 255, 0.38);
+      --morph-inner: rgba(255, 255, 255, 0.14);
     }
 
     * {
@@ -38,14 +46,40 @@
     }
 
     body {
-      font-family: Inter, system-ui, -apple-system, sans-serif;
+      font-family: var(--font-ui), system-ui, -apple-system, sans-serif;
       color: var(--txt);
-      background:
-        radial-gradient(900px 600px at 12% 8%, rgba(71, 71, 71, 0.24), transparent 55%),
-        radial-gradient(780px 520px at 100% 96%, rgba(31, 53, 83, 0.22), transparent 48%),
-        linear-gradient(160deg, var(--bg0), var(--bg1));
+      background: linear-gradient(160deg, var(--bg0), var(--bg1));
       padding: 20px;
       overflow-x: hidden;
+      position: relative;
+      letter-spacing: 0.12px;
+    }
+
+    .spline-bg {
+      position: fixed;
+      inset: 0;
+      z-index: -3;
+      pointer-events: none;
+      background: linear-gradient(150deg, #070b16, #0f1729);
+    }
+
+    .spline-bg spline-viewer {
+      width: 100%;
+      height: 100%;
+      display: block;
+      opacity: 0.95;
+    }
+
+    body::before {
+      content: "";
+      position: fixed;
+      inset: 0;
+      z-index: -2;
+      pointer-events: none;
+      background:
+        radial-gradient(1000px 560px at 10% 14%, rgba(200, 233, 255, 0.14), transparent 55%),
+        radial-gradient(900px 600px at 92% 86%, rgba(157, 196, 255, 0.12), transparent 52%),
+        linear-gradient(160deg, rgba(7, 10, 18, 0.62), rgba(9, 16, 28, 0.68));
     }
 
     .grid-wrap {
@@ -53,50 +87,97 @@
       margin: 0 auto;
       display: grid;
       gap: 16px;
+      position: relative;
+      z-index: 2;
     }
 
     .topbar {
-      background: linear-gradient(150deg, rgba(255, 255, 255, 0.06), rgba(255, 255, 255, 0.02));
-      border: 1px solid var(--line);
-      border-radius: var(--radius);
-      backdrop-filter: blur(14px) saturate(145%);
-      -webkit-backdrop-filter: blur(14px) saturate(145%);
+      background: linear-gradient(115deg, rgba(255, 255, 255, 0.22), rgba(192, 220, 255, 0.09) 38%, rgba(89, 124, 176, 0.07));
+      border: 1px solid rgba(255, 255, 255, 0.5);
+      border-radius: 32px;
+      backdrop-filter: blur(18px) saturate(140%);
+      -webkit-backdrop-filter: blur(18px) saturate(140%);
       box-shadow: var(--shadow);
-      padding: 18px;
+      padding: 14px 20px;
       display: flex;
       align-items: center;
       justify-content: space-between;
-      gap: 12px;
-      flex-wrap: wrap;
+      gap: 16px;
+      flex-wrap: nowrap;
+      position: relative;
+      z-index: 2;
+      transition: border-color .28s ease, box-shadow .28s ease, transform .28s ease;
+      overflow: hidden;
+    }
+
+    .topbar::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      border-radius: inherit;
+      border: 1px solid rgba(255, 255, 255, 0.16);
+      box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.22),
+        inset 0 -10px 25px rgba(7, 16, 30, 0.22);
+      pointer-events: none;
+    }
+
+    .topbar:hover {
+      border-color: rgba(255, 255, 255, 0.62);
+      box-shadow: 0 30px 76px -24px rgba(0, 0, 0, 0.66), 0 0 0 1px rgba(173, 220, 255, 0.2) inset;
+      transform: translateY(-1px);
+    }
+
+    .topbar-brand {
+      display: grid;
+      gap: 4px;
+      min-width: 0;
     }
 
     .title {
-      font-family: Poppins, sans-serif;
-      font-size: clamp(1.2rem, 1.8vw, 1.8rem);
-      letter-spacing: 0.2px;
-      font-weight: 700;
+      font-family: var(--font-display), sans-serif;
+      font-size: clamp(1.15rem, 1.6vw, 1.55rem);
+      letter-spacing: 0.1px;
+      font-weight: 800;
+      line-height: 1.15;
+      white-space: nowrap;
+      text-shadow: 0 6px 20px rgba(0, 0, 0, 0.38);
     }
 
     .subtitle {
-      color: var(--txt-soft);
-      font-size: 0.94rem;
-      max-width: 700px;
+      color: #d3dfef;
+      font-size: 0.84rem;
+      max-width: 760px;
+      line-height: 1.3;
     }
 
-    .pill-row {
+    .topbar-nav {
       display: flex;
-      gap: 8px;
       align-items: center;
+      justify-content: flex-end;
+      gap: 8px;
       flex-wrap: wrap;
+      margin-left: auto;
     }
 
     .pill {
       border: 1px solid var(--line-bright);
       border-radius: 999px;
-      padding: 6px 10px;
-      font-size: 0.78rem;
-      color: #d5e2f0;
-      background: rgba(19, 29, 41, 0.45);
+      padding: 9px 16px;
+      font-size: 0.72rem;
+      font-weight: 600;
+      letter-spacing: 0.15px;
+      color: #e6f1ff;
+      background: rgba(27, 42, 64, 0.46);
+      white-space: nowrap;
+      transition: transform .2s ease, border-color .2s ease, box-shadow .2s ease, background .2s ease;
+    }
+
+    .pill:hover {
+      transform: translateY(-2px);
+      border-color: rgba(196, 230, 255, 0.92);
+      box-shadow: 0 10px 20px -10px rgba(52, 149, 232, 0.55);
+      background: rgba(47, 70, 103, 0.62);
     }
 
     .pill .dot {
@@ -121,19 +202,41 @@
     }
 
     .panel {
-      background: var(--glass);
-      border: 1px solid var(--line);
+      background: linear-gradient(145deg, var(--glass), rgba(18, 30, 48, 0.4));
+      border: 1px solid var(--morph-edge);
       border-radius: var(--radius);
-      backdrop-filter: blur(13px) saturate(150%);
-      -webkit-backdrop-filter: blur(13px) saturate(150%);
-      box-shadow: var(--shadow);
-      padding: 14px;
+      backdrop-filter: blur(18px) saturate(160%);
+      -webkit-backdrop-filter: blur(18px) saturate(160%);
+      box-shadow:
+        var(--shadow),
+        inset 0 1px 0 rgba(255, 255, 255, 0.22),
+        inset 0 -16px 30px rgba(6, 14, 26, 0.3);
+      padding: 16px;
+      transition: transform .28s ease, border-color .28s ease, box-shadow .28s ease, background .28s ease;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .panel::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      border-radius: inherit;
+      border: 1px solid rgba(255, 255, 255, 0.14);
+      pointer-events: none;
+    }
+
+    .panel:hover {
+      transform: translateY(-2px);
+      border-color: rgba(197, 229, 255, 0.5);
+      box-shadow: 0 32px 80px -28px rgba(0, 0, 0, 0.72), 0 0 0 1px rgba(170, 216, 255, 0.18) inset;
     }
 
     .panel h2 {
-      font-family: Poppins, sans-serif;
+      font-family: var(--font-display), sans-serif;
       font-size: 1.02rem;
       margin-bottom: 10px;
+      letter-spacing: 0.2px;
     }
 
     .controls {
@@ -148,10 +251,18 @@
       display: inline-flex;
       align-items: center;
       gap: 8px;
-      background: rgba(0, 0, 0, 0.28);
-      border: 1px solid var(--line);
-      border-radius: 12px;
-      padding: 8px;
+      background: rgba(219, 237, 255, 0.08);
+      border: 1px solid rgba(255, 255, 255, 0.34);
+      border-radius: 16px;
+      padding: 9px 10px;
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.16);
+      transition: border-color .24s ease, box-shadow .24s ease, background .24s ease;
+    }
+
+    .control-group:hover {
+      border-color: rgba(183, 220, 255, 0.6);
+      box-shadow: 0 8px 18px -12px rgba(110, 180, 240, 0.55);
+      background: rgba(219, 237, 255, 0.12);
     }
 
     label {
@@ -166,47 +277,99 @@
     input[type="search"],
     input[type="text"],
     button {
-      border: 1px solid #3b4352;
-      background: rgba(12, 12, 12, 0.88);
+      border: 1px solid rgba(255, 255, 255, 0.3);
+      background: rgba(8, 15, 28, 0.62);
       color: var(--txt);
-      border-radius: 10px;
+      border-radius: 16px;
       padding: 10px 12px;
       font: inherit;
+      transition: transform .16s ease, border-color .2s ease, box-shadow .2s ease, background .2s ease;
+      box-shadow: 0 8px 16px -12px rgba(0, 0, 0, 0.9);
+    }
+
+    select:hover,
+    input[type="search"]:hover,
+    input[type="text"]:hover {
+      border-color: rgba(186, 224, 255, 0.58);
+      background: rgba(17, 27, 45, 0.72);
+      transform: translateY(-1px);
+    }
+
+    select:focus-visible,
+    input[type="search"]:focus-visible,
+    input[type="text"]:focus-visible,
+    button:focus-visible {
+      outline: none;
+      border-color: #95d0ff;
+      box-shadow: 0 0 0 2px rgba(149, 208, 255, 0.3), 0 10px 20px -12px rgba(69, 161, 232, 0.85);
     }
 
     button {
+      font-family: var(--font-display), sans-serif;
       font-weight: 700;
-      letter-spacing: 0.3px;
+      letter-spacing: 0.28px;
       cursor: pointer;
-      transition: transform 0.14s ease, border-color 0.2s ease, background 0.2s ease;
+      position: relative;
+      border-color: rgba(146, 202, 255, 0.58);
+      background:
+        linear-gradient(180deg, rgba(255, 255, 255, 0.16), rgba(255, 255, 255, 0) 42%),
+        linear-gradient(160deg, var(--btn-top), var(--btn-bottom));
+      box-shadow:
+        0 11px 0 #082c52,
+        0 20px 22px -16px rgba(0, 0, 0, 0.85),
+        0 0 0 1px rgba(160, 214, 255, 0.2) inset;
+      text-shadow: 0 1px 0 rgba(0, 0, 0, 0.35);
     }
 
     button:hover {
-      border-color: #89a9cf;
-      background: rgba(22, 24, 29, 0.95);
+      transform: translateY(-2px);
+      border-color: #cce8ff;
+      box-shadow:
+        0 13px 0 #0a2f57,
+        0 24px 30px -16px rgba(0, 0, 0, 0.9),
+        0 0 0 1px rgba(196, 233, 255, 0.35) inset,
+        0 0 30px -10px var(--btn-glow);
+      filter: saturate(1.12);
     }
 
     button:active {
-      transform: translateY(1px);
+      transform: translateY(6px);
+      box-shadow:
+        0 5px 0 #082c52,
+        0 10px 16px -14px rgba(0, 0, 0, 0.86),
+        0 0 0 1px rgba(136, 199, 255, 0.22) inset;
     }
 
     .btn-accent {
-      border-color: #68aee8;
-      background: linear-gradient(140deg, rgba(24, 102, 162, 0.95), rgba(36, 128, 198, 0.95));
+      border-color: #9adaff;
+      background:
+        linear-gradient(180deg, rgba(255, 255, 255, 0.24), rgba(255, 255, 255, 0) 42%),
+        linear-gradient(150deg, #3cb4ff, #0079ca);
+      box-shadow:
+        0 11px 0 #00518d,
+        0 22px 24px -16px rgba(0, 0, 0, 0.9),
+        0 0 0 1px rgba(189, 230, 255, 0.38) inset;
     }
 
     .btn-accent:hover {
-      border-color: #95cbff;
-      background: linear-gradient(140deg, rgba(20, 88, 140, 0.95), rgba(33, 115, 178, 0.95));
+      border-color: #c7ecff;
+      box-shadow:
+        0 13px 0 #00538f,
+        0 26px 30px -16px rgba(0, 0, 0, 0.94),
+        0 0 0 1px rgba(204, 240, 255, 0.45) inset,
+        0 0 32px -8px rgba(83, 181, 255, 0.62);
     }
 
     .player {
-      border: 1px solid #2f394b;
-      border-radius: 16px;
+      border: 1px solid rgba(255, 255, 255, 0.32);
+      border-radius: 22px;
       overflow: hidden;
       background: #000;
       aspect-ratio: 16 / 9;
       width: 100%;
+      box-shadow:
+        0 20px 40px -26px rgba(0, 0, 0, 0.92),
+        0 0 0 1px rgba(255, 255, 255, 0.14) inset;
     }
 
     .player iframe {
@@ -218,10 +381,13 @@
 
     .caption-board {
       margin-top: 12px;
-      border: 1px solid #21283a;
-      border-radius: 14px;
-      background: #010814;
-      padding: 12px;
+      border: 1px solid rgba(255, 255, 255, 0.26);
+      border-radius: 22px;
+      background: rgba(4, 12, 27, 0.64);
+      padding: 14px;
+      box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.15),
+        inset 0 -12px 20px rgba(4, 10, 21, 0.38);
     }
 
     .caption-head {
@@ -264,11 +430,22 @@
 
     .visual-card {
       background: var(--glass-2);
-      border: 1px solid var(--line);
-      border-radius: 12px;
-      padding: 10px;
+      border: 1px solid rgba(255, 255, 255, 0.26);
+      border-radius: 20px;
+      padding: 12px;
       position: relative;
       overflow: hidden;
+      transition: transform .24s ease, border-color .24s ease, box-shadow .24s ease, background .24s ease;
+      box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.14),
+        inset 0 -12px 22px rgba(4, 10, 20, 0.32);
+    }
+
+    .visual-card:hover {
+      transform: translateY(-4px);
+      border-color: rgba(175, 220, 255, 0.6);
+      box-shadow: 0 24px 30px -22px rgba(0, 0, 0, 0.85), 0 0 0 1px rgba(170, 216, 255, 0.16) inset;
+      background: rgba(15, 25, 45, 0.7);
     }
 
     .visual-card::after {
@@ -290,7 +467,7 @@
       font-size: 0.95rem;
       margin-bottom: 6px;
       color: #d5e9ff;
-      font-family: Poppins, sans-serif;
+      font-family: var(--font-display), sans-serif;
     }
 
     .visual-card p {
@@ -318,9 +495,9 @@
     }
 
     .notif-banner {
-      border-radius: 12px;
-      border: 1px solid #30506d;
-      background: rgba(22, 39, 57, 0.86);
+      border-radius: 18px;
+      border: 1px solid rgba(145, 195, 242, 0.5);
+      background: rgba(24, 48, 76, 0.56);
       padding: 10px;
       color: #cde8ff;
       font-weight: 600;
@@ -349,20 +526,30 @@
       margin-top: 8px;
       max-height: 360px;
       overflow: auto;
-      border: 1px solid #2a3547;
-      border-radius: 12px;
-      background: rgba(2, 8, 19, 0.7);
-      padding: 8px;
+      border: 1px solid rgba(255, 255, 255, 0.25);
+      border-radius: 18px;
+      background: rgba(3, 12, 30, 0.62);
+      padding: 10px;
+      box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.13),
+        inset 0 -10px 20px rgba(3, 9, 17, 0.34);
     }
 
     .line-item {
-      padding: 8px;
-      border-radius: 8px;
+      padding: 10px;
+      border-radius: 14px;
       margin-bottom: 6px;
       border: 1px solid transparent;
       color: #eaf4ff;
       font-size: 0.9rem;
       line-height: 1.35;
+      transition: border-color .2s ease, background .2s ease, transform .2s ease;
+    }
+
+    .line-item:hover {
+      transform: translateY(-1px);
+      border-color: rgba(135, 190, 244, 0.45);
+      background: rgba(14, 35, 61, 0.44);
     }
 
     .line-item.active {
@@ -377,13 +564,16 @@
     }
 
     .avatar-box {
-      border: 1px dashed #4e6480;
-      border-radius: 12px;
-      padding: 12px;
-      background: rgba(7, 12, 22, 0.74);
+      border: 1px dashed rgba(145, 195, 242, 0.7);
+      border-radius: 20px;
+      padding: 14px;
+      background: rgba(7, 18, 36, 0.56);
       display: grid;
       gap: 8px;
       text-align: center;
+      box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.14),
+        inset 0 -12px 20px rgba(4, 10, 21, 0.34);
     }
 
     .avatar-video {
@@ -391,7 +581,7 @@
       max-height: 240px;
       object-fit: cover;
       border: 1px solid #31506e;
-      border-radius: 10px;
+      border-radius: 18px;
       background: #000;
       box-shadow: inset 0 0 0 1px rgba(125, 191, 255, 0.15);
     }
@@ -407,11 +597,18 @@
     .sign-token {
       border: 1px solid #3e5d80;
       border-radius: 999px;
-      padding: 4px 9px;
+      padding: 6px 11px;
       font-size: 0.76rem;
       color: #cce4ff;
       background: rgba(16, 30, 46, 0.75);
       transition: all .18s ease;
+    }
+
+    .sign-token:hover {
+      transform: translateY(-2px);
+      border-color: #8fc9ff;
+      background: rgba(27, 62, 97, 0.84);
+      box-shadow: 0 8px 15px -10px rgba(69, 147, 221, 0.8);
     }
 
     .sign-token.active {
@@ -463,8 +660,35 @@
       width: min(360px, calc(100vw - 24px));
     }
 
+    .debug-box {
+      margin-top: 12px;
+      border: 1px dashed #3e5d80;
+      border-radius: 20px;
+      background: rgba(7, 12, 22, 0.74);
+      padding: 12px 14px;
+      box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.12),
+        inset 0 -12px 20px rgba(3, 8, 15, 0.34);
+    }
+
+    .debug-box h3 {
+      font-size: 0.84rem;
+      color: #9dcbff;
+      margin-bottom: 6px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .debug-list {
+      display: grid;
+      gap: 4px;
+      font-size: 0.8rem;
+      color: #c9d8ea;
+      font-family: "JetBrains Mono", "Courier New", monospace;
+    }
+
     .toast {
-      border-radius: 10px;
+      border-radius: 14px;
       border-left: 4px solid #8ec9ff;
       background: rgba(15, 23, 32, 0.95);
       color: #f3f8ff;
@@ -472,6 +696,8 @@
       font-size: 0.9rem;
       box-shadow: var(--shadow);
       animation: slideIn .2s ease-out;
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
     }
 
     .toast.warn { border-left-color: #ffc06a; }
@@ -486,7 +712,7 @@
     .kbd {
       border: 1px solid #55617b;
       border-bottom-width: 2px;
-      border-radius: 6px;
+      border-radius: 10px;
       padding: 2px 6px;
       font-size: 0.75rem;
       color: #c9d8ea;
@@ -497,21 +723,49 @@
       .main {
         grid-template-columns: 1fr;
       }
+
+      .topbar {
+        flex-wrap: wrap;
+        gap: 12px;
+      }
+
+      .topbar-nav {
+        width: 100%;
+        justify-content: flex-start;
+      }
+    }
+
+    @media (max-width: 720px) {
+      .topbar {
+        padding: 12px 14px;
+      }
+
+      .subtitle {
+        display: none;
+      }
+    }
+
+    #logo{
+visibility: hidden;
+
     }
   </style>
 </head>
 <body>
+  <div class="spline-bg" aria-hidden="true">
+    <spline-viewer id="logo" url="https://prod.spline.design/7HcFWOtgxYDGEdTI/scene.splinecode"></spline-viewer>
+  </div>
   <div class="grid-wrap">
     <header class="topbar">
-      <div>
+      <div class="topbar-brand">
         <div class="title">Deaf Learning Mode</div>
         <div class="subtitle">Same lesson content, different format: high-contrast captions, instant transcript, WLASL sign mapping, visual notifications, and haptic events.</div>
       </div>
-      <div class="pill-row">
+      <nav class="topbar-nav" aria-label="Mode status">
         <span class="pill"><span class="dot" id="sttDot"></span>Captions Engine</span>
         <span class="pill"><span class="dot" id="hapticDot"></span>Haptics</span>
         <span class="pill">Sound-free Navigation</span>
-      </div>
+      </nav>
     </header>
 
     <div class="main">
@@ -529,7 +783,7 @@
           <div class="control-group">
             <label for="captionEngine">STT</label>
             <select id="captionEngine">
-              <option value="vosk">Vosk Browser (Offline Model)</option>
+              <option value="webspeech">Web Speech API (Live)</option>
             </select>
           </div>
 
@@ -544,8 +798,8 @@
           <div class="control-group">
             <label for="captionFont">Font</label>
             <select id="captionFont">
-              <option value="Inter, sans-serif">Inter</option>
-              <option value="Poppins, sans-serif">Poppins</option>
+              <option value="'Sora', sans-serif">Sora</option>
+              <option value="'Manrope', sans-serif">Manrope</option>
               <option value="'Arial Black', Arial, sans-serif">Arial Black</option>
             </select>
           </div>
@@ -574,6 +828,17 @@
           </div>
         </section>
 
+        <section class="debug-box" aria-live="polite">
+          <h3>Speech Debug</h3>
+          <div id="voskDebug" class="debug-list">
+            <div>stage: idle</div>
+            <div>supported: checking...</div>
+            <div>permission: unknown</div>
+            <div>active: no</div>
+            <div>results: 0</div>
+          </div>
+        </section>
+
         <section style="margin-top:14px;">
           <h2>Visual Learning Mode</h2>
           <div id="visualCards" class="visual-mode"></div>
@@ -596,22 +861,6 @@
         </section>
 
         <section class="panel">
-          <h2>Instant Lecture Transcript</h2>
-          <div class="transcript-tools">
-            <input id="searchTranscript" type="search" placeholder="Search transcript..." />
-            <div class="transcript-actions">
-              <button id="copyTranscript">Copy</button>
-              <button id="saveTranscript">Save</button>
-              <button id="clearTranscript">Clear</button>
-            </div>
-          </div>
-          <div id="transcriptList" class="transcript-list"></div>
-          <div class="helper" style="margin-top:8px;">
-            Transcript is scrollable, searchable, copyable, and saved by lesson in local storage.
-          </div>
-        </section>
-
-        <section class="panel">
           <h2>Sign-Language Avatar</h2>
           <div class="controls">
             <label><input type="checkbox" id="avatarToggle" checked /> Avatar ON</label>
@@ -624,7 +873,6 @@
             <video
               id="avatarVideo"
               class="avatar-video"
-              autoplay
               loop
               muted
               playsinline
@@ -639,6 +887,22 @@
             <strong id="avatarConcept">Concept: Input Accessibility</strong>
             <div id="signSequence" class="sign-seq"></div>
             <div id="avatarHint" class="helper">WLASL sequence updates from concepts and live captions.</div>
+          </div>
+        </section>
+
+        <section class="panel">
+          <h2>Instant Lecture Transcript</h2>
+          <div class="transcript-tools">
+            <input id="searchTranscript" type="search" placeholder="Search transcript..." />
+            <div class="transcript-actions">
+              <button id="copyTranscript">Copy</button>
+              <button id="saveTranscript">Save</button>
+              <button id="clearTranscript">Clear</button>
+            </div>
+          </div>
+          <div id="transcriptList" class="transcript-list"></div>
+          <div class="helper" style="margin-top:8px;">
+            Transcript is scrollable, searchable, copyable, and saved by lesson in local storage.
           </div>
         </section>
 
@@ -658,7 +922,6 @@
   <div id="toasts" class="toasts" aria-live="polite"></div>
 
   <script src="https://www.youtube.com/iframe_api"></script>
-  <script type="application/javascript" src="https://cdn.jsdelivr.net/npm/vosk-browser@0.0.5/dist/vosk.js"></script>
   <script>
     (function() {
       const captionLive = document.getElementById('captionLive');
@@ -690,25 +953,24 @@
       const avatarBox = document.getElementById('avatarBox');
       const avatarVideo = document.getElementById('avatarVideo');
       const toasts = document.getElementById('toasts');
+      const voskDebug = document.getElementById('voskDebug');
+      const SpeechRecognitionAPI = window.SpeechRecognition || window.webkitSpeechRecognition || null;
 
       const lessonId = 'inclusive-main';
       let transcript = [];
-      const voskModelUrl = 'https://ccoreilly.github.io/vosk-browser/models/vosk-model-small-en-us-0.15.tar.gz';
       let captionsShouldRun = false;
-      let voskModelPromise = null;
-      let voskModel = null;
-      let voskRecognizer = null;
-      let voskAudioContext = null;
-      let voskMediaStream = null;
-      let voskSourceNode = null;
-      let voskProcessorNode = null;
-      let voskSilenceGain = null;
-      let voskStarting = false;
-      let voskReady = false;
+      let speechRecognition = null;
+      let speechStarting = false;
+      let speechActive = false;
+      let speechRestartTimer = null;
+      let speechResultCount = 0;
+      let speechInterimCount = 0;
+      let suppressSpeechToast = false;
       let avatarInterval = null;
       let signInterval = null;
       let youTubePlayer = null;
       let lessonStartSent = false;
+      let avatarSyncInterval = null;
 
       const concepts = [
         'Input Accessibility',
@@ -758,6 +1020,11 @@
       function setBanner(text, warn) {
         notifBanner.textContent = text;
         notifBanner.classList.toggle('warn', Boolean(warn));
+      }
+
+      function setDebug(lines) {
+        if (!voskDebug) return;
+        voskDebug.innerHTML = lines.map((line) => '<div>' + line + '</div>').join('');
       }
 
       function supportsVibration() {
@@ -814,7 +1081,6 @@
       function addTranscript(text) {
         const clean = String(text || '').trim();
         if (!clean) return;
-        lastCaptionEventAt = Date.now();
         transcript.push({ time: ts(), text: clean });
         renderTranscript();
         syncAvatarFromCaption(clean);
@@ -891,30 +1157,48 @@
         renderSignSequence(tokens);
       }
 
-      function enforceAvatarPlayback() {
+      function setupAvatarVideo() {
         if (!avatarVideo) return;
         avatarVideo.muted = true;
         avatarVideo.defaultMuted = true;
         avatarVideo.volume = 0;
         avatarVideo.loop = true;
-        avatarVideo.autoplay = true;
+        avatarVideo.autoplay = false;
+        avatarVideo.controls = false;
+        avatarVideo.pause();
+      }
 
-        const keepPlaying = () => {
-          if (avatarVideo.paused || avatarVideo.ended) {
-            avatarVideo.play().catch(() => {});
-          }
-        };
+      function syncAvatarPlaybackWithYouTube(stateOverride) {
+        if (!avatarVideo) return;
+        if (!avatarToggle.checked) {
+          avatarVideo.pause();
+          return;
+        }
 
-        avatarVideo.addEventListener('pause', () => {
-          keepPlaying();
-        });
+        const YTRef = window.YT;
+        const playingState = YTRef && YTRef.PlayerState ? YTRef.PlayerState.PLAYING : 1;
+        const state =
+          typeof stateOverride === 'number'
+            ? stateOverride
+            : (youTubePlayer && typeof youTubePlayer.getPlayerState === 'function'
+              ? youTubePlayer.getPlayerState()
+              : null);
 
-        document.addEventListener('visibilitychange', () => {
-          if (!document.hidden) keepPlaying();
-        });
+        if (state === playingState) {
+          avatarVideo.play().catch(() => {});
+          return;
+        }
+        avatarVideo.pause();
+      }
 
-        window.setInterval(keepPlaying, 1200);
-        keepPlaying();
+      function startAvatarYouTubeSyncLoop() {
+        if (avatarSyncInterval) {
+          clearInterval(avatarSyncInterval);
+          avatarSyncInterval = null;
+        }
+        avatarSyncInterval = window.setInterval(() => {
+          syncAvatarPlaybackWithYouTube();
+        }, 300);
       }
 
       function syncAvatarFromCaption(text) {
@@ -934,158 +1218,271 @@
 
 
 
-      function normalizeMicError(err) {
-        const name = err && err.name ? err.name : '';
-        if (name === 'NotAllowedError' || name === 'SecurityError') {
-          return 'Microphone permission is blocked. Allow mic access in browser site settings.';
+      function getSpeechPermissionState() {
+        if (!navigator.permissions || !navigator.permissions.query) {
+          return Promise.resolve('unknown');
         }
-        if (name === 'NotFoundError' || name === 'DevicesNotFoundError') {
-          return 'No microphone detected. Connect a mic and retry.';
-        }
-        if (name === 'NotReadableError' || name === 'TrackStartError') {
-          return 'Microphone is busy in another app. Close that app and retry.';
-        }
-        return (err && err.message) ? err.message : 'Microphone is unavailable.';
+        return navigator.permissions.query({ name: 'microphone' })
+          .then((result) => result.state || 'unknown')
+          .catch(() => 'unknown');
       }
 
-      async function loadVoskModel() {
-        if (!window.Vosk || typeof window.Vosk.createModel !== 'function') {
-          throw new Error('Vosk browser library did not load.');
+      function normalizeSpeechError(error) {
+        switch (error) {
+          case 'not-allowed':
+          case 'service-not-allowed':
+            return 'Microphone permission is blocked. Allow mic access in Chrome site settings and macOS Privacy settings.';
+          case 'audio-capture':
+            return 'No microphone audio is reaching the browser. Check your selected input device and Chrome microphone access.';
+          case 'network':
+            return 'The browser speech service had a network interruption. Retrying automatically.';
+          case 'no-speech':
+            return 'No speech was detected yet. Keep speaking clearly and the captions will continue listening.';
+          default:
+            return 'Speech recognition could not start.';
         }
-        if (!voskModelPromise) {
-          captionStatus.textContent = 'Loading model';
-          sttInfo.textContent = 'Source: Downloading Vosk model (~40MB first time).';
-          setCaptionText('Loading Vosk speech model for offline captions...');
-          voskModelPromise = window.Vosk.createModel(voskModelUrl);
-        }
-        voskModel = await voskModelPromise;
-        return voskModel;
       }
 
-      function teardownVoskSession() {
-        if (voskSourceNode) {
-          try { voskSourceNode.disconnect(); } catch (_err) {}
-          voskSourceNode = null;
-        }
-        if (voskProcessorNode) {
-          voskProcessorNode.onaudioprocess = null;
-          try { voskProcessorNode.disconnect(); } catch (_err) {}
-          voskProcessorNode = null;
-        }
-        if (voskSilenceGain) {
-          try { voskSilenceGain.disconnect(); } catch (_err) {}
-          voskSilenceGain = null;
-        }
-        if (voskMediaStream) {
-          voskMediaStream.getTracks().forEach((track) => track.stop());
-          voskMediaStream = null;
-        }
-        if (voskAudioContext) {
-          voskAudioContext.close().catch(() => {});
-          voskAudioContext = null;
-        }
-        if (voskRecognizer && typeof voskRecognizer.remove === 'function') {
-          try { voskRecognizer.remove(); } catch (_err) {}
-        }
-        voskRecognizer = null;
-        voskReady = false;
+      function refreshDebug(stage) {
+        getSpeechPermissionState().then((permissionState) => {
+          setDebug([
+            'stage: ' + stage,
+            'supported: ' + (SpeechRecognitionAPI ? 'yes' : 'no'),
+            'permission: ' + permissionState,
+            'active: ' + (speechActive ? 'yes' : 'no'),
+            'results: ' + speechResultCount,
+            'interim updates: ' + speechInterimCount
+          ]);
+        });
       }
 
-      async function startCaptions() {
-        if (voskStarting || voskReady) return;
-        captionsShouldRun = true;
-        voskStarting = true;
+      function clearSpeechRestart() {
+        if (speechRestartTimer) {
+          clearTimeout(speechRestartTimer);
+          speechRestartTimer = null;
+        }
+      }
 
-        try {
-          const model = await loadVoskModel();
-          if (!captionsShouldRun) return;
+      function scheduleSpeechRestart(reason) {
+        if (!captionsShouldRun) return;
+        clearSpeechRestart();
+        captionStatus.textContent = 'Listening';
+        sttInfo.textContent = 'Source: Web Speech API reconnecting after ' + reason + '.';
+        refreshDebug('restart:' + reason);
+        speechRestartTimer = setTimeout(() => {
+          startRecognitionCycle(true);
+        }, 450);
+      }
 
-          const mediaStream = await navigator.mediaDevices.getUserMedia({
-            video: false,
-            audio: {
-              echoCancellation: true,
-              noiseSuppression: true,
-              channelCount: 1,
-              sampleRate: 16000
+      function destroyRecognition() {
+        clearSpeechRestart();
+        const current = speechRecognition;
+        speechRecognition = null;
+        speechActive = false;
+        speechStarting = false;
+        if (current) {
+          current.onstart = null;
+          current.onaudiostart = null;
+          current.onspeechstart = null;
+          current.onresult = null;
+          current.onerror = null;
+          current.onend = null;
+          try { current.abort(); } catch (_err) {}
+        }
+        refreshDebug('stopped');
+      }
+
+      function buildRecognition() {
+        if (!SpeechRecognitionAPI) return null;
+        const recognition = new SpeechRecognitionAPI();
+        recognition.lang = 'en-US';
+        recognition.continuous = true;
+        recognition.interimResults = true;
+        recognition.maxAlternatives = 1;
+
+        recognition.onstart = () => {
+          speechStarting = false;
+          speechActive = true;
+          captionStatus.textContent = 'Listening';
+          sttInfo.textContent = 'Source: Web Speech API (microphone active)';
+          if (!captionLive.textContent || captionLive.textContent === 'Captions will appear here.') {
+            setCaptionText('Listening for speech...');
+          }
+          if (!suppressSpeechToast) {
+            showToast('Live captions started.', 'ok');
+          }
+          suppressSpeechToast = false;
+          refreshDebug('listening');
+          updateDots();
+        };
+
+        recognition.onaudiostart = () => {
+          sttInfo.textContent = 'Source: Web Speech API (audio detected)';
+          refreshDebug('audio-start');
+        };
+
+        recognition.onspeechstart = () => {
+          captionStatus.textContent = 'Listening';
+          sttInfo.textContent = 'Source: Web Speech API (speech detected)';
+          refreshDebug('speech-start');
+        };
+
+        recognition.onresult = (event) => {
+          let interim = '';
+          const finalParts = [];
+          for (let i = event.resultIndex; i < event.results.length; i += 1) {
+            const part = String(event.results[i][0] && event.results[i][0].transcript || '').trim();
+            if (!part) continue;
+            if (event.results[i].isFinal) {
+              finalParts.push(part);
+            } else {
+              interim += (interim ? ' ' : '') + part;
             }
-          });
-          if (!captionsShouldRun) {
-            mediaStream.getTracks().forEach((track) => track.stop());
+          }
+
+          if (interim) {
+            speechInterimCount += 1;
+            setCaptionText(interim);
+          }
+
+          if (finalParts.length) {
+            const finalText = finalParts.join(' ');
+            speechResultCount += finalParts.length;
+            finalParts.forEach(addTranscript);
+            setCaptionText(finalText);
+          }
+
+          captionStatus.textContent = 'Listening';
+          sttInfo.textContent = 'Source: Web Speech API (live speech recognition)';
+          refreshDebug(finalParts.length ? 'final-result' : 'interim-result');
+          updateDots();
+        };
+
+        recognition.onerror = (event) => {
+          const error = event && event.error ? event.error : 'unknown';
+          speechActive = false;
+          speechStarting = false;
+          updateDots();
+
+          if (error === 'no-speech') {
+            sttInfo.textContent = 'Source: Web Speech API (waiting for speech)';
+            refreshDebug('no-speech');
+            scheduleSpeechRestart(error);
             return;
           }
 
-          const AudioContextCtor = window.AudioContext || window.webkitAudioContext;
-          if (!AudioContextCtor) {
-            throw new Error('AudioContext is not supported in this browser.');
+          if (error === 'aborted' && captionsShouldRun) {
+            refreshDebug('aborted');
+            scheduleSpeechRestart(error);
+            return;
           }
 
-          voskMediaStream = mediaStream;
-          voskAudioContext = new AudioContextCtor();
-          await voskAudioContext.resume();
+          if (error === 'network' && captionsShouldRun) {
+            setBanner(normalizeSpeechError(error), true);
+            showToast(normalizeSpeechError(error), 'warn');
+            scheduleSpeechRestart(error);
+            return;
+          }
 
-          voskRecognizer = new model.KaldiRecognizer(voskAudioContext.sampleRate);
-          voskRecognizer.on('result', (message) => {
-            const text = message && message.result ? message.result.text : '';
-            if (!text) return;
-            addTranscript(text);
-            setCaptionText(text);
-            captionStatus.textContent = 'Listening';
-            sttInfo.textContent = 'Source: Vosk browser recognizer (final result)';
-            updateDots();
-          });
-          voskRecognizer.on('partialresult', (message) => {
-            const partial = message && message.result ? message.result.partial : '';
-            if (!partial) return;
-            setCaptionText(partial);
-            captionStatus.textContent = 'Listening';
-            sttInfo.textContent = 'Source: Vosk browser recognizer (partial result)';
-            updateDots();
-          });
-
-          voskProcessorNode = voskAudioContext.createScriptProcessor(4096, 1, 1);
-          voskProcessorNode.onaudioprocess = (event) => {
-            if (!voskRecognizer || !captionsShouldRun) return;
-            try {
-              voskRecognizer.acceptWaveform(event.inputBuffer);
-            } catch (error) {
-              console.error('Vosk acceptWaveform failed', error);
-            }
-          };
-
-          voskSourceNode = voskAudioContext.createMediaStreamSource(voskMediaStream);
-          voskSilenceGain = voskAudioContext.createGain();
-          voskSilenceGain.gain.value = 0;
-
-          voskSourceNode.connect(voskProcessorNode);
-          voskProcessorNode.connect(voskSilenceGain);
-          voskSilenceGain.connect(voskAudioContext.destination);
-
-          voskReady = true;
-          captionStatus.textContent = 'Listening';
-          sttInfo.textContent = 'Source: Vosk browser recognizer ready';
-          showToast('Vosk captions started.', 'ok');
-          updateDots();
-        } catch (err) {
-          const msg = normalizeMicError(err);
-          teardownVoskSession();
           captionsShouldRun = false;
+          const message = normalizeSpeechError(error);
+          destroyRecognition();
           captionStatus.textContent = 'Mic error';
-          sttInfo.textContent = 'Source: Vosk could not start.';
+          sttInfo.textContent = 'Source: Web Speech API could not start.';
+          setBanner(message, true);
+          showToast(message, 'error');
           setCaptionText('Captions will appear here.');
-          setBanner(msg, true);
-          showToast(msg, 'error');
+          refreshDebug('error:' + error);
           updateDots();
-        } finally {
-          voskStarting = false;
+        };
+
+        recognition.onend = () => {
+          speechActive = false;
+          speechStarting = false;
+          updateDots();
+          if (captionsShouldRun) {
+            scheduleSpeechRestart('ended');
+            return;
+          }
+          captionStatus.textContent = 'Stopped';
+          sttInfo.textContent = 'Source: Waiting for start.';
+          refreshDebug('ended');
+        };
+
+        return recognition;
+      }
+
+      function startRecognitionCycle(isRetry) {
+        if (!captionsShouldRun || speechStarting || speechActive) return;
+        if (!SpeechRecognitionAPI) {
+          captionStatus.textContent = 'Unsupported';
+          sttInfo.textContent = 'Source: Web Speech API is not available in this browser.';
+          setBanner('This browser does not support the Web Speech API. Use Chrome for live captions.', true);
+          showToast('Web Speech API is not supported in this browser.', 'error');
+          refreshDebug('unsupported');
+          updateDots();
+          return;
         }
+
+        clearSpeechRestart();
+        speechStarting = true;
+        suppressSpeechToast = Boolean(isRetry);
+        if (!speechRecognition) {
+          speechRecognition = buildRecognition();
+        }
+        captionStatus.textContent = isRetry ? 'Listening' : 'Starting';
+        sttInfo.textContent = 'Source: Web Speech API (requesting microphone)';
+        refreshDebug(isRetry ? 'restarting' : 'starting');
+
+        try {
+          speechRecognition.start();
+        } catch (err) {
+          speechStarting = false;
+          if (String(err && err.message || '').toLowerCase().includes('already started')) {
+            speechActive = true;
+            refreshDebug('already-started');
+            updateDots();
+            return;
+          }
+          const message = err && err.message ? err.message : 'Speech recognition failed to start.';
+          captionsShouldRun = false;
+          destroyRecognition();
+          captionStatus.textContent = 'Mic error';
+          sttInfo.textContent = 'Source: Web Speech API could not start.';
+          setBanner(message, true);
+          showToast(message, 'error');
+          refreshDebug('start-failed');
+          updateDots();
+        }
+      }
+
+      function startCaptions() {
+        captionsShouldRun = true;
+        speechResultCount = 0;
+        speechInterimCount = 0;
+        startRecognitionCycle(false);
       }
 
       function stopCaptions() {
         captionsShouldRun = false;
-        voskStarting = false;
-        teardownVoskSession();
+        clearSpeechRestart();
+        suppressSpeechToast = true;
+        const current = speechRecognition;
+        speechRecognition = null;
+        speechActive = false;
+        speechStarting = false;
+        if (current) {
+          current.onstart = null;
+          current.onaudiostart = null;
+          current.onspeechstart = null;
+          current.onresult = null;
+          current.onerror = null;
+          current.onend = null;
+          try { current.abort(); } catch (_err) {}
+        }
         captionStatus.textContent = 'Stopped';
         sttInfo.textContent = 'Source: Waiting for start.';
+        refreshDebug('stopped');
         updateDots();
       }
 
@@ -1146,11 +1543,16 @@
 
         youTubePlayer = new YTRef.Player('youtubePlayer', {
           events: {
+            onReady: function() {
+              startAvatarYouTubeSyncLoop();
+              syncAvatarPlaybackWithYouTube();
+            },
             onStateChange: function(ev) {
               if (ev.data === YTRef.PlayerState.PLAYING && !lessonStartSent) {
                 lessonStartSent = true;
                 fireLessonStart();
               }
+              syncAvatarPlaybackWithYouTube(ev.data);
             }
           }
         });
@@ -1197,6 +1599,7 @@
       avatarToggle.addEventListener('change', () => {
         avatarBox.style.opacity = avatarToggle.checked ? '1' : '.45';
         showToast(avatarToggle.checked ? 'Avatar enabled.' : 'Avatar disabled.', avatarToggle.checked ? 'ok' : 'warn');
+        syncAvatarPlaybackWithYouTube();
       });
 
       avatarMode.addEventListener('change', () => {
@@ -1211,7 +1614,7 @@
       });
 
       window.addEventListener('beforeunload', saveTranscriptLocal);
-      window.addEventListener('beforeunload', teardownVoskSession);
+      window.addEventListener('beforeunload', destroyRecognition);
 
       applyCaptionPreferences();
       initVisualCards();
@@ -1219,9 +1622,11 @@
       loadTranscriptLocal();
       setupKeyboardShortcuts();
       updateDots();
-      enforceAvatarPlayback();
-      captionEngine.value = 'vosk';
-      sttInfo.textContent = 'Source: Vosk browser recognizer ready. First start downloads the small English model.';
+      setupAvatarVideo();
+      syncAvatarPlaybackWithYouTube();
+      captionEngine.value = 'webspeech';
+      sttInfo.textContent = 'Source: Web Speech API ready.';
+      refreshDebug('idle');
 
       // Same content, different format seed text.
       addTranscript('Inclusive multimodal learning preserves the same concept while changing presentation format.');

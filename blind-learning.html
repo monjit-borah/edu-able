@@ -6,34 +6,70 @@
   <title>Blind Learning Mode</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Poppins:wght@500;600;700&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Sora:wght@500;600;700;800&display=swap" rel="stylesheet" />
+  <script type="module" src="https://unpkg.com/@splinetool/viewer@1.12.61/build/spline-viewer.js"></script>
   <style>
     :root {
-      --bg0: #030303;
-      --bg1: #0d0d0d;
-      --glass: rgba(19, 19, 19, 0.68);
-      --line: rgba(255, 255, 255, 0.08);
+      --bg0: #04070f;
+      --bg1: #0b1220;
+      --glass: rgba(20, 30, 48, 0.44);
+      --glass-2: rgba(12, 20, 36, 0.55);
+      --line: rgba(255, 255, 255, 0.32);
+      --line-bright: rgba(255, 255, 255, 0.52);
       --txt: #f1f1f1;
-      --txt-soft: #9ea5b4;
+      --txt-soft: #c2d0e2;
       --accent: #79c2ff;
       --ok: #6de3a4;
       --warn: #ffc46d;
       --danger: #ff8e8e;
-      --radius: 22px;
-      --shadow: 0 35px 70px -26px rgba(0, 0, 0, 0.8);
+      --radius: 28px;
+      --shadow: 0 32px 78px -24px rgba(0, 0, 0, 0.68);
+      --font-ui: "Manrope", sans-serif;
+      --font-display: "Sora", sans-serif;
+      --btn-top: #2c89d6;
+      --btn-bottom: #0c3f73;
+      --btn-base: #082c52;
+      --btn-glow: rgba(121, 194, 255, 0.38);
     }
 
     * { box-sizing: border-box; margin: 0; padding: 0; }
 
     body {
       min-height: 100vh;
-      font-family: Inter, system-ui, -apple-system, sans-serif;
+      font-family: var(--font-ui), system-ui, -apple-system, sans-serif;
       color: var(--txt);
-      background:
-        radial-gradient(900px 600px at 12% 8%, rgba(71, 71, 71, 0.24), transparent 55%),
-        radial-gradient(780px 520px at 100% 96%, rgba(31, 53, 83, 0.22), transparent 48%),
-        linear-gradient(160deg, var(--bg0), var(--bg1));
+      background: linear-gradient(160deg, var(--bg0), var(--bg1));
       padding: 20px;
+      position: relative;
+      overflow-x: hidden;
+      letter-spacing: 0.12px;
+    }
+
+    .spline-bg {
+      position: fixed;
+      inset: 0;
+      z-index: -3;
+      pointer-events: none;
+      background: linear-gradient(150deg, #070b16, #0f1729);
+    }
+
+    .spline-bg spline-viewer {
+      width: 100%;
+      height: 100%;
+      display: block;
+      opacity: 0.95;
+    }
+
+    body::before {
+      content: "";
+      position: fixed;
+      inset: 0;
+      z-index: -2;
+      pointer-events: none;
+      background:
+        radial-gradient(1000px 560px at 10% 14%, rgba(200, 233, 255, 0.14), transparent 55%),
+        radial-gradient(900px 600px at 92% 86%, rgba(157, 196, 255, 0.12), transparent 52%),
+        linear-gradient(160deg, rgba(7, 10, 18, 0.62), rgba(9, 16, 28, 0.68));
     }
 
     .grid-wrap {
@@ -41,41 +77,63 @@
       margin: 0 auto;
       display: grid;
       gap: 16px;
+      position: relative;
+      z-index: 2;
     }
 
     .panel {
-      background: var(--glass);
+      background: linear-gradient(145deg, var(--glass), rgba(18, 30, 48, 0.4));
       border: 1px solid var(--line);
       border-radius: var(--radius);
-      backdrop-filter: blur(13px) saturate(150%);
-      -webkit-backdrop-filter: blur(13px) saturate(150%);
+      backdrop-filter: blur(18px) saturate(160%);
+      -webkit-backdrop-filter: blur(18px) saturate(160%);
       box-shadow: var(--shadow);
       padding: 16px;
+      transition: transform .26s ease, border-color .26s ease, box-shadow .26s ease;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .panel::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      border-radius: inherit;
+      border: 1px solid rgba(255, 255, 255, 0.14);
+      pointer-events: none;
+    }
+
+    .panel:hover {
+      transform: translateY(-2px);
+      border-color: rgba(197, 229, 255, 0.5);
+      box-shadow: 0 34px 84px -28px rgba(0, 0, 0, 0.72), 0 0 0 1px rgba(170, 216, 255, 0.18) inset;
     }
 
     .title {
-      font-family: Poppins, sans-serif;
+      font-family: var(--font-display), sans-serif;
       font-size: clamp(1.2rem, 1.8vw, 1.8rem);
-      font-weight: 700;
+      font-weight: 800;
       margin-bottom: 6px;
+      text-shadow: 0 6px 20px rgba(0, 0, 0, 0.38);
     }
 
     .sub { color: var(--txt-soft); font-size: 0.94rem; }
 
     .status {
       margin-top: 10px;
-      border: 1px solid #30506d;
-      border-radius: 12px;
-      background: rgba(22, 39, 57, 0.86);
+      border: 1px solid rgba(145, 195, 242, 0.5);
+      border-radius: 16px;
+      background: rgba(24, 48, 76, 0.56);
       padding: 10px;
       color: #cde8ff;
       font-weight: 600;
       font-size: 0.9rem;
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.14);
     }
 
     .status.warn {
       border-color: #7e5d2d;
-      background: rgba(58, 42, 19, 0.86);
+      background: rgba(58, 42, 19, 0.9);
       color: #ffd9a8;
     }
 
@@ -88,12 +146,20 @@
     .pill-row { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
 
     .pill {
-      border: 1px solid rgba(255, 255, 255, 0.18);
+      border: 1px solid var(--line-bright);
       border-radius: 999px;
-      padding: 6px 10px;
+      padding: 8px 14px;
       font-size: 0.78rem;
-      background: rgba(19, 29, 41, 0.45);
-      color: #d5e2f0;
+      background: rgba(27, 42, 64, 0.46);
+      color: #e6f1ff;
+      transition: transform .2s ease, border-color .2s ease, box-shadow .2s ease, background .2s ease;
+    }
+
+    .pill:hover {
+      transform: translateY(-2px);
+      border-color: rgba(196, 230, 255, 0.92);
+      box-shadow: 0 10px 20px -10px rgba(52, 149, 232, 0.55);
+      background: rgba(47, 70, 103, 0.62);
     }
 
     .main {
@@ -105,32 +171,87 @@
     .controls { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
 
     button {
-      border: 1px solid #3b4352;
-      background: rgba(12, 12, 12, 0.88);
+      border: 1px solid rgba(146, 202, 255, 0.58);
+      background:
+        linear-gradient(180deg, rgba(255, 255, 255, 0.16), rgba(255, 255, 255, 0) 42%),
+        linear-gradient(160deg, var(--btn-top), var(--btn-bottom));
       color: var(--txt);
-      border-radius: 10px;
+      border-radius: 16px;
       padding: 10px 12px;
       font: inherit;
       font-weight: 700;
+      font-family: var(--font-display), sans-serif;
       cursor: pointer;
+      transition: transform .16s ease, border-color .2s ease, box-shadow .2s ease, filter .2s ease;
+      box-shadow:
+        0 11px 0 var(--btn-base),
+        0 20px 22px -16px rgba(0, 0, 0, 0.85),
+        0 0 0 1px rgba(160, 214, 255, 0.2) inset;
+      text-shadow: 0 1px 0 rgba(0, 0, 0, 0.35);
     }
 
-    button:hover { border-color: #89a9cf; }
+    button:hover {
+      transform: translateY(-2px);
+      border-color: #cce8ff;
+      box-shadow:
+        0 13px 0 #0a2f57,
+        0 24px 30px -16px rgba(0, 0, 0, 0.9),
+        0 0 0 1px rgba(196, 233, 255, 0.35) inset,
+        0 0 30px -10px var(--btn-glow);
+      filter: saturate(1.12);
+    }
+
+    button:active {
+      transform: translateY(6px);
+      box-shadow:
+        0 5px 0 var(--btn-base),
+        0 10px 16px -14px rgba(0, 0, 0, 0.86),
+        0 0 0 1px rgba(136, 199, 255, 0.22) inset;
+    }
 
     .btn-accent {
-      border-color: #68aee8;
-      background: linear-gradient(140deg, rgba(24, 102, 162, 0.95), rgba(36, 128, 198, 0.95));
+      border-color: #9adaff;
+      background:
+        linear-gradient(180deg, rgba(255, 255, 255, 0.24), rgba(255, 255, 255, 0) 42%),
+        linear-gradient(150deg, #3cb4ff, #0079ca);
+      box-shadow:
+        0 11px 0 #00518d,
+        0 22px 24px -16px rgba(0, 0, 0, 0.9),
+        0 0 0 1px rgba(189, 230, 255, 0.38) inset;
     }
 
     .list { margin-top: 10px; display: grid; gap: 8px; }
 
     .item {
-      border: 1px solid #2a3547;
-      border-radius: 12px;
-      background: rgba(2, 8, 19, 0.7);
+      border: 1px solid rgba(255, 255, 255, 0.25);
+      border-radius: 16px;
+      background: rgba(3, 12, 30, 0.62);
       padding: 10px;
       font-size: 0.93rem;
       line-height: 1.4;
+      transition: border-color .2s ease, background .2s ease, transform .2s ease;
+    }
+
+    .item:hover {
+      transform: translateY(-1px);
+      border-color: rgba(135, 190, 244, 0.45);
+      background: rgba(14, 35, 61, 0.44);
+    }
+
+    .debug-box {
+      margin-top: 12px;
+      border: 1px dashed rgba(145, 195, 242, 0.7);
+      border-radius: 16px;
+      padding: 10px;
+      background: rgba(7, 18, 36, 0.56);
+      font-size: 0.8rem;
+      color: #c9d8ea;
+      font-family: "JetBrains Mono", "Courier New", monospace;
+      display: grid;
+      gap: 4px;
+      box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.14),
+        inset 0 -12px 20px rgba(4, 10, 21, 0.34);
     }
 
     .item strong { color: #d5e9ff; }
@@ -138,7 +259,7 @@
     .kbd {
       border: 1px solid #55617b;
       border-bottom-width: 2px;
-      border-radius: 6px;
+      border-radius: 10px;
       padding: 2px 6px;
       font-size: 0.75rem;
       color: #c9d8ea;
@@ -159,17 +280,20 @@
 
     figure {
       margin-top: 10px;
-      border: 1px solid #2a3547;
-      border-radius: 12px;
+      border: 1px solid rgba(255, 255, 255, 0.25);
+      border-radius: 16px;
       padding: 10px;
-      background: rgba(2, 8, 19, 0.7);
+      background: rgba(3, 12, 30, 0.62);
+      box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.13),
+        inset 0 -10px 20px rgba(3, 9, 17, 0.34);
     }
 
     figure img {
       width: 100%;
       max-height: 230px;
       object-fit: cover;
-      border-radius: 8px;
+      border-radius: 12px;
       border: 1px solid #31506e;
     }
 
@@ -178,9 +302,16 @@
     @media (max-width: 960px) {
       .main { grid-template-columns: 1fr; }
     }
+
+    #logo{
+      visibility: hidden;
+    }
   </style>
 </head>
 <body>
+  <div class="spline-bg" aria-hidden="true">
+    <spline-viewer id="logo" url="https://prod.spline.design/7HcFWOtgxYDGEdTI/scene.splinecode"></spline-viewer>
+  </div>
   <main class="grid-wrap" aria-label="Blind learning mode">
     <section class="panel" aria-labelledby="heading">
       <h1 id="heading" class="title">Blind / Visually Impaired Learning Mode</h1>
@@ -210,6 +341,14 @@
         <span class="kbd">Alt</span>+<span class="kbd">P</span> play/pause,
         <span class="kbd">Alt</span>+<span class="kbd">Q</span> quiz.
       </p>
+      <div id="voskDebug" class="debug-box" aria-live="polite">
+        <div>stage: idle</div>
+        <div>supported: checking...</div>
+        <div>permission: unknown</div>
+        <div>active: no</div>
+        <div>partials: 0</div>
+        <div>results: 0</div>
+      </div>
     </section>
 
     <section class="main">
@@ -234,13 +373,13 @@
     <div id="ariaAnnouncements" class="sr-only" aria-live="assertive" aria-atomic="true"></div>
   </main>
 
-  <script type="application/javascript" src="https://cdn.jsdelivr.net/npm/vosk-browser@0.0.5/dist/vosk.js"></script>
   <script>
     (function() {
       const statusBanner = document.getElementById('statusBanner');
       const ariaAnnouncements = document.getElementById('ariaAnnouncements');
       const lessonList = document.getElementById('lessonList');
       const voiceLog = document.getElementById('voiceLog');
+      const voskDebug = document.getElementById('voskDebug');
 
       const startAssistantBtn = document.getElementById('startAssistantBtn');
       const startLessonBtn = document.getElementById('startLessonBtn');
@@ -250,6 +389,7 @@
       const fasterBtn = document.getElementById('fasterBtn');
       const explainDiagramBtn = document.getElementById('explainDiagramBtn');
       const quizBtn = document.getElementById('quizBtn');
+      const RecognitionAPI = window.SpeechRecognition || window.webkitSpeechRecognition || null;
 
       const lessonSections = [
         {
@@ -346,73 +486,93 @@
       let listening = false;
       let quizActive = false;
       let quizIndex = 0;
-      const voskModelUrl = 'https://ccoreilly.github.io/vosk-browser/models/vosk-model-small-en-us-0.15.tar.gz';
-      let voskModelPromise = null;
-      let voskModel = null;
-      let voskRecognizer = null;
-      let voskAudioContext = null;
-      let voskMediaStream = null;
-      let voskSourceNode = null;
-      let voskProcessorNode = null;
-      let voskSilenceGain = null;
-      let voskStarting = false;
+      let recognition = null;
+      let recognitionStarting = false;
+      let assistantShouldListen = false;
+      let restartTimer = null;
       let heardPartial = '';
+      let speechPartialCount = 0;
+      let speechResultCount = 0;
 
-      function normalizeMicError(err) {
-        const name = err && err.name ? err.name : '';
-        if (name === 'NotAllowedError' || name === 'SecurityError') {
-          return 'Microphone permission is blocked. Allow mic access in browser site settings.';
-        }
-        if (name === 'NotFoundError' || name === 'DevicesNotFoundError') {
-          return 'No microphone detected. Connect a mic and retry.';
-        }
-        if (name === 'NotReadableError' || name === 'TrackStartError') {
-          return 'Microphone is busy in another app. Close that app and retry.';
-        }
-        return (err && err.message) ? err.message : 'Microphone is unavailable.';
+      function setDebug(lines) {
+        if (!voskDebug) return;
+        voskDebug.innerHTML = lines.map((line) => '<div>' + line + '</div>').join('');
       }
 
-      async function loadVoskModel() {
-        if (!window.Vosk || typeof window.Vosk.createModel !== 'function') {
-          throw new Error('Vosk browser library did not load.');
+      function getSpeechPermissionState() {
+        if (!navigator.permissions || !navigator.permissions.query) {
+          return Promise.resolve('unknown');
         }
-        if (!voskModelPromise) {
-          setStatus('Loading offline voice model. This may take a moment on first use.', '');
-          voskModelPromise = window.Vosk.createModel(voskModelUrl);
-        }
-        voskModel = await voskModelPromise;
-        return voskModel;
+        return navigator.permissions.query({ name: 'microphone' })
+          .then((result) => result.state || 'unknown')
+          .catch(() => 'unknown');
       }
 
-      function teardownListening() {
-        if (voskSourceNode) {
-          try { voskSourceNode.disconnect(); } catch (_err) {}
-          voskSourceNode = null;
+      function refreshDebug(stage) {
+        getSpeechPermissionState().then((permissionState) => {
+          setDebug([
+            'stage: ' + stage,
+            'supported: ' + (RecognitionAPI ? 'yes' : 'no'),
+            'permission: ' + permissionState,
+            'active: ' + (listening ? 'yes' : 'no'),
+            'partials: ' + speechPartialCount,
+            'results: ' + speechResultCount
+          ]);
+        });
+      }
+
+      function normalizeSpeechError(error) {
+        switch (error) {
+          case 'not-allowed':
+          case 'service-not-allowed':
+            return 'Microphone permission is blocked. Allow mic access in Chrome site settings and macOS Privacy settings.';
+          case 'audio-capture':
+            return 'No microphone audio is reaching the browser. Check your selected input device and Chrome microphone access.';
+          case 'network':
+            return 'The browser speech service had a network interruption. Listening will retry automatically.';
+          case 'no-speech':
+            return 'No speech was detected yet. Keep using short commands like start lesson, next, or repeat.';
+          default:
+            return 'Voice recognition could not start.';
         }
-        if (voskProcessorNode) {
-          voskProcessorNode.onaudioprocess = null;
-          try { voskProcessorNode.disconnect(); } catch (_err) {}
-          voskProcessorNode = null;
+      }
+
+      function clearRestartTimer() {
+        if (restartTimer) {
+          clearTimeout(restartTimer);
+          restartTimer = null;
         }
-        if (voskSilenceGain) {
-          try { voskSilenceGain.disconnect(); } catch (_err) {}
-          voskSilenceGain = null;
+      }
+
+      function scheduleListeningRestart(reason) {
+        if (!assistantShouldListen) return;
+        clearRestartTimer();
+        refreshDebug('restart:' + reason);
+        restartTimer = setTimeout(() => {
+          startListening(true);
+        }, 400);
+      }
+
+      function teardownListening(keepIntent) {
+        clearRestartTimer();
+        if (!keepIntent) {
+          assistantShouldListen = false;
         }
-        if (voskMediaStream) {
-          voskMediaStream.getTracks().forEach((track) => track.stop());
-          voskMediaStream = null;
-        }
-        if (voskAudioContext) {
-          voskAudioContext.close().catch(() => {});
-          voskAudioContext = null;
-        }
-        if (voskRecognizer && typeof voskRecognizer.remove === 'function') {
-          try { voskRecognizer.remove(); } catch (_err) {}
-        }
-        voskRecognizer = null;
+        const current = recognition;
+        recognition = null;
         heardPartial = '';
         listening = false;
-        voskStarting = false;
+        recognitionStarting = false;
+        if (current) {
+          current.onstart = null;
+          current.onaudiostart = null;
+          current.onspeechstart = null;
+          current.onresult = null;
+          current.onerror = null;
+          current.onend = null;
+          try { current.abort(); } catch (_err) {}
+        }
+        refreshDebug('stopped');
       }
 
       function renderLessonList() {
@@ -454,9 +614,9 @@
           return;
         }
         if (!text) return;
-        const shouldResumeListening = listening;
-        if (shouldResumeListening) {
-          teardownListening();
+        const shouldResumeListening = assistantShouldListen;
+        if (shouldResumeListening && (listening || recognitionStarting)) {
+          teardownListening(true);
         }
         if (interrupt) {
           window.speechSynthesis.cancel();
@@ -659,85 +819,114 @@
       }
 
       function startListening(silentRetry) {
-        if (listening || voskStarting) return;
-        voskStarting = true;
-        loadVoskModel()
-          .then((model) => {
-            return navigator.mediaDevices.getUserMedia({
-              video: false,
-              audio: {
-                echoCancellation: true,
-                noiseSuppression: true,
-                channelCount: 1,
-                sampleRate: 16000
-              }
-            }).then(async (mediaStream) => {
-              const AudioContextCtor = window.AudioContext || window.webkitAudioContext;
-              if (!AudioContextCtor) {
-                throw new Error('AudioContext is not supported in this browser.');
-              }
+        assistantShouldListen = true;
+        if (listening || recognitionStarting) return;
+        if (!RecognitionAPI) {
+          setStatus('Voice assistant is not supported in this browser. Use Chrome for live commands.', 'error');
+          refreshDebug('unsupported');
+          return;
+        }
 
-              voskMediaStream = mediaStream;
-              try {
-                voskAudioContext = new AudioContextCtor({ sampleRate: 16000 });
-              } catch (_err) {
-                voskAudioContext = new AudioContextCtor();
-              }
-              await voskAudioContext.resume();
+        clearRestartTimer();
+        recognitionStarting = true;
+        heardPartial = '';
+        refreshDebug(silentRetry ? 'restarting' : 'starting');
 
-              try {
-                voskRecognizer = new model.KaldiRecognizer(16000, JSON.stringify(commandGrammar));
-              } catch (_err) {
-                voskRecognizer = new model.KaldiRecognizer(voskAudioContext.sampleRate);
-              }
-              voskRecognizer.on('result', (message) => {
-                const text = message && message.result ? String(message.result.text || '').trim() : '';
-                if (!text) return;
-                heardPartial = '';
-                logVoice('Heard', text);
-                handleCommand(text);
-              });
-              voskRecognizer.on('partialresult', (message) => {
-                const partial = message && message.result ? String(message.result.partial || '').trim() : '';
-                if (!partial || partial === heardPartial) return;
-                heardPartial = partial;
-                setStatus('Listening for command: ' + partial, '');
-              });
+        const current = new RecognitionAPI();
+        current.lang = 'en-US';
+        current.continuous = true;
+        current.interimResults = true;
+        current.maxAlternatives = 1;
 
-              voskProcessorNode = voskAudioContext.createScriptProcessor(4096, 1, 1);
-              voskProcessorNode.onaudioprocess = (event) => {
-                if (!voskRecognizer || !listening) return;
-                try {
-                  voskRecognizer.acceptWaveform(event.inputBuffer);
-                } catch (error) {
-                  console.error('Vosk acceptWaveform failed', error);
-                }
-              };
+        current.onstart = () => {
+          recognitionStarting = false;
+          listening = true;
+          setStatus('Voice assistant is actively listening. Use short commands like hello, start lesson, next, repeat, pause, play, explain the image, or start quiz.', '');
+          refreshDebug('listening');
+        };
 
-              voskSourceNode = voskAudioContext.createMediaStreamSource(voskMediaStream);
-              voskSilenceGain = voskAudioContext.createGain();
-              voskSilenceGain.gain.value = 0;
-              voskSourceNode.connect(voskProcessorNode);
-              voskProcessorNode.connect(voskSilenceGain);
-              voskSilenceGain.connect(voskAudioContext.destination);
+        current.onaudiostart = () => {
+          setStatus('Microphone active. Speak a command like start lesson or next.', '');
+          refreshDebug('audio-start');
+        };
 
-              listening = true;
-              voskStarting = false;
-              setStatus('Voice assistant is actively listening. Use short commands like hello, start lesson, next, repeat, pause, play, explain the image, or start quiz.', '');
+        current.onspeechstart = () => {
+          setStatus('Speech detected. Processing your command.', '');
+          refreshDebug('speech-start');
+        };
 
-              if (!silentRetry) {
-                speak('Voice assistant started. Say hello, start lesson, next, repeat, pause, play, or start quiz.', true);
-              }
-            });
-          })
-          .catch((err) => {
-            teardownListening();
-            const msg = normalizeMicError(err);
-            setStatus('Voice assistant could not start: ' + msg, 'error');
-            if (!silentRetry) {
-              speak('Voice assistant could not start. ' + msg, true);
+        current.onresult = (event) => {
+          let interim = '';
+          const finalParts = [];
+          for (let i = event.resultIndex; i < event.results.length; i += 1) {
+            const part = String(event.results[i][0] && event.results[i][0].transcript || '').trim();
+            if (!part) continue;
+            if (event.results[i].isFinal) {
+              finalParts.push(part);
+            } else {
+              interim += (interim ? ' ' : '') + part;
             }
-          });
+          }
+
+          if (interim && interim !== heardPartial) {
+            heardPartial = interim;
+            speechPartialCount += 1;
+            setStatus('Listening for command: ' + interim, '');
+            refreshDebug('partial-result');
+          }
+
+          if (!finalParts.length) {
+            return;
+          }
+
+          heardPartial = '';
+          const spokenText = finalParts.join(' ');
+          speechResultCount += finalParts.length;
+          logVoice('Heard', spokenText);
+          refreshDebug('final-result');
+          handleCommand(spokenText);
+        };
+
+        current.onerror = (event) => {
+          const error = event && event.error ? event.error : 'unknown';
+          recognition = null;
+          listening = false;
+          recognitionStarting = false;
+
+          if ((error === 'no-speech' || error === 'aborted' || error === 'network') && assistantShouldListen) {
+            setStatus(normalizeSpeechError(error), error === 'network' ? 'warn' : '');
+            scheduleListeningRestart(error);
+            return;
+          }
+
+          assistantShouldListen = false;
+          setStatus('Voice assistant could not start: ' + normalizeSpeechError(error), 'error');
+          refreshDebug('error:' + error);
+        };
+
+        current.onend = () => {
+          const shouldRestart = assistantShouldListen;
+          recognition = null;
+          listening = false;
+          recognitionStarting = false;
+          if (shouldRestart) {
+            scheduleListeningRestart('ended');
+            return;
+          }
+          refreshDebug('ended');
+        };
+
+        recognition = current;
+        try {
+          current.start();
+        } catch (err) {
+          recognition = null;
+          recognitionStarting = false;
+          listening = false;
+          assistantShouldListen = false;
+          setStatus('Voice assistant could not start: ' + (err && err.message ? err.message : 'Speech recognition failed to start.'), 'error');
+          refreshDebug('start-failed');
+        }
       }
 
       function handleCommand(rawText) {
@@ -836,6 +1025,7 @@
       const onboarding =
         'You are now in Blind Learning Mode. This page supports voice-first navigation. Say hello, start lesson, next, repeat, pause, play, explain the image, or start quiz.';
       setStatus('Page loaded. Spoken guidance started.', '');
+      refreshDebug('idle');
       speak(onboarding, true);
 
       setTimeout(() => {

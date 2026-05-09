@@ -1,0 +1,1772 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>FlowLearn — ADHD Learning Platform</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Sora:wght@300;400;600;700;800&family=Manrope:wght@400;600;700;800&display=swap" rel="stylesheet" />
+  <script type="module" src="https://unpkg.com/@splinetool/viewer@1.12.61/build/spline-viewer.js"></script>
+  <style>
+    /* ═══════════════════════════════════════════════
+       FlowLearn — ADHD EdTech Platform Styles
+    ═══════════════════════════════════════════════ */
+    :root {
+      --bg:        #04070f;
+      --card:      rgba(20, 30, 48, 0.44);
+      --card2:     rgba(12, 20, 36, 0.55);
+      --accent:    #79c2ff;
+      --accent2:   #3cb4ff;
+      --green:     #4ade80;
+      --red:       #f87171;
+      --text:      #e6edf3;
+      --muted:     #b9c7db;
+      --border:    rgba(255,255,255,0.3);
+      --glow:      0 0 20px rgba(121,194,255,0.3);
+      --glow2:     0 0 40px rgba(121,194,255,0.5);
+      --radius:    22px;
+      --radius-sm: 12px;
+      --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      --btn-top:   #2c89d6;
+      --btn-bottom:#0c3f73;
+      --btn-base:  #082c52;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+
+    body {
+      background: linear-gradient(160deg, #04070f, #0b1220);
+      color: var(--text);
+      font-family: 'Manrope', 'Sora', sans-serif;
+      font-size: 14px;
+      overflow: hidden;
+      height: 100vh;
+      width: 100vw;
+      position: relative;
+    }
+
+    .spline-bg {
+      position: fixed;
+      inset: 0;
+      z-index: -3;
+      pointer-events: none;
+      background: linear-gradient(150deg, #070b16, #0f1729);
+    }
+
+    .spline-bg spline-viewer {
+      width: 100%;
+      height: 100%;
+      display: block;
+      opacity: 0.95;
+    }
+
+    body::before {
+      content: "";
+      position: fixed;
+      inset: 0;
+      z-index: -2;
+      pointer-events: none;
+      background:
+        radial-gradient(1000px 560px at 10% 14%, rgba(200, 233, 255, 0.14), transparent 55%),
+        radial-gradient(900px 600px at 92% 86%, rgba(157, 196, 255, 0.12), transparent 52%),
+        linear-gradient(160deg, rgba(7, 10, 18, 0.62), rgba(9, 16, 28, 0.68));
+    }
+
+    ::-webkit-scrollbar { width: 4px; }
+    ::-webkit-scrollbar-track { background: var(--bg); }
+    ::-webkit-scrollbar-thumb { background: var(--accent); border-radius: 2px; }
+
+    /* ── MODAL ── */
+    .modal-overlay {
+      position: fixed; inset: 0; z-index: 9999;
+      background: rgba(11,15,25,0.95);
+      backdrop-filter: blur(12px);
+      display: flex; align-items: center; justify-content: center;
+      animation: fadeIn 0.4s ease;
+    }
+    .modal-box {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 24px;
+      padding: 40px;
+      max-width: 440px;
+      width: 90%;
+      text-align: center;
+      box-shadow: 0 0 60px rgba(124,156,255,0.15);
+      animation: slideUp 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+    .modal-icon { font-size: 48px; margin-bottom: 16px; }
+    .modal-box h2 { font-size: 22px; font-weight: 700; margin-bottom: 12px; }
+    .modal-box p { color: var(--muted); line-height: 1.6; margin-bottom: 20px; }
+    .modal-box input {
+      width: 100%;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 12px 16px;
+      color: var(--text);
+      font-family: 'Space Mono', monospace;
+      font-size: 13px;
+      margin-bottom: 16px;
+      transition: var(--transition);
+    }
+    .modal-box input:focus { outline: none; border-color: var(--accent); box-shadow: var(--glow); }
+    .modal-actions { display: flex; gap: 12px; justify-content: center; }
+    .modal-hint { font-size: 12px; color: var(--muted); margin-top: 16px; margin-bottom: 0; }
+    .modal-hint a { color: var(--accent); text-decoration: none; }
+
+    /* ── BUTTONS ── */
+    .btn-primary, .btn-accent, .btn-ghost {
+      border: 1px solid rgba(146, 202, 255, 0.58);
+      border-radius: 50px;
+      padding: 10px 22px;
+      font-family: 'Sora', sans-serif;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: var(--transition);
+      position: relative;
+      overflow: hidden;
+      text-shadow: 0 1px 0 rgba(0, 0, 0, 0.35);
+    }
+    .btn-primary, .btn-accent {
+      color: var(--text);
+      background:
+        linear-gradient(180deg, rgba(255, 255, 255, 0.16), rgba(255, 255, 255, 0) 42%),
+        linear-gradient(160deg, var(--btn-top), var(--btn-bottom));
+      box-shadow:
+        0 11px 0 var(--btn-base),
+        0 20px 22px -16px rgba(0, 0, 0, 0.85),
+        0 0 0 1px rgba(160, 214, 255, 0.2) inset;
+    }
+    .btn-primary:hover, .btn-accent:hover {
+      box-shadow:
+        0 13px 0 #0a2f57,
+        0 24px 30px -16px rgba(0, 0, 0, 0.9),
+        0 0 0 1px rgba(196, 233, 255, 0.35) inset,
+        0 0 30px -10px rgba(121,194,255,0.38);
+      transform: translateY(-2px);
+      filter: saturate(1.12);
+    }
+    .btn-ghost {
+      background: rgba(8, 15, 28, 0.62);
+      border: 1px solid rgba(255,255,255,0.3);
+      color: var(--text);
+      box-shadow: 0 8px 16px -12px rgba(0, 0, 0, 0.9);
+    }
+    .btn-ghost:hover { border-color: #cce8ff; box-shadow: var(--glow); transform: translateY(-1px); }
+    .btn-primary.small, .btn-accent.small, .btn-ghost.small { padding: 7px 16px; font-size: 12px; }
+
+    /* ── HEADER ── */
+    #main-header {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+      height: 60px;
+      background: linear-gradient(115deg, rgba(255,255,255,0.18), rgba(192,220,255,0.08) 38%, rgba(89,124,176,0.07));
+      backdrop-filter: blur(18px) saturate(145%);
+      -webkit-backdrop-filter: blur(18px) saturate(145%);
+      border-bottom: 1px solid rgba(255,255,255,0.4);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 20px;
+      gap: 16px;
+    }
+    .logo {
+      font-family: 'Space Mono', monospace;
+      font-size: 16px;
+      font-weight: 700;
+      color: #d9ecff;
+      white-space: nowrap;
+      margin-right: 16px;
+    }
+    .header-left { display: flex; align-items: center; gap: 12px; }
+    .header-right { display: flex; align-items: center; gap: 10px; flex-shrink: 0; }
+
+    .topic-pills { display: flex; gap: 6px; overflow-x: auto; scrollbar-width: none; }
+    .topic-pills::-webkit-scrollbar { display: none; }
+    .pill {
+      background: rgba(27, 42, 64, 0.46);
+      border: 1px solid rgba(255,255,255,0.34);
+      border-radius: 50px;
+      padding: 5px 14px;
+      color: #d9e7ff;
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: var(--transition);
+    }
+    .pill:hover, .pill.active {
+      border-color: rgba(196,230,255,0.92);
+      color: #f2f8ff;
+      box-shadow: 0 10px 20px -10px rgba(52,149,232,0.55);
+      background: rgba(47, 70, 103, 0.62);
+      transform: translateY(-1px);
+    }
+
+    .xp-badge, .streak-badge {
+      display: flex; align-items: center; gap: 5px;
+      background: rgba(27, 42, 64, 0.46);
+      border: 1px solid rgba(255,255,255,0.32);
+      border-radius: 50px;
+      padding: 5px 12px;
+      font-size: 12px;
+      font-weight: 600;
+    }
+    .xp-badge { color: #fbbf24; border-color: rgba(251,191,36,0.3); }
+    .streak-badge { color: #f97316; border-color: rgba(249,115,22,0.3); }
+    .xp-icon { animation: spin 3s linear infinite; display: inline-block; }
+
+    /* ── MAIN LAYOUT ── */
+    #app { height: 100vh; overflow: hidden; }
+    #main-layout {
+      display: grid;
+      grid-template-columns: 1fr 340px;
+      height: calc(100vh - 60px);
+      margin-top: 60px;
+    }
+
+    /* ── REEL CONTAINER ── */
+    #reel-container {
+      overflow-y: scroll;
+      scroll-snap-type: y mandatory;
+      -webkit-overflow-scrolling: touch;
+      scrollbar-width: none;
+      background: transparent;
+      position: relative;
+    }
+    #reel-container::-webkit-scrollbar { display: none; }
+
+    .reel-card {
+      scroll-snap-align: start;
+      height: calc(100vh - 60px);
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      animation: reelFadeIn 0.5s ease;
+    }
+    @keyframes reelFadeIn {
+      from { opacity: 0; transform: translateY(20px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    .reel-video-wrap {
+      position: relative;
+      width: 100%;
+      flex: 1;
+      background: #000;
+      overflow: hidden;
+    }
+    .reel-video-wrap iframe {
+      position: absolute; inset: 0;
+      width: 100%; height: 100%;
+      border: none; display: block;
+    }
+    .reel-overlay {
+      position: absolute; inset: 0;
+      pointer-events: none; z-index: 3;
+      background: linear-gradient(to bottom, transparent 50%, rgba(11,15,25,0.8) 85%, var(--bg) 100%);
+    }
+    .reel-info {
+      position: absolute;
+      bottom: 0; left: 0; right: 0;
+      padding: 20px 24px 16px;
+      pointer-events: none; z-index: 4;
+    }
+    .reel-tags { display: flex; gap: 8px; margin-bottom: 8px; }
+    .tag {
+      font-size: 11px; font-weight: 700;
+      padding: 3px 10px; border-radius: 50px;
+      text-transform: uppercase; letter-spacing: 0.5px;
+    }
+    .tag.topic { background: rgba(124,156,255,0.15); color: var(--accent); border: 1px solid var(--accent); }
+    .tag.difficulty-easy { background: rgba(74,222,128,0.1); color: var(--green); border: 1px solid var(--green); }
+    .tag.difficulty-medium { background: rgba(251,191,36,0.1); color: #fbbf24; border: 1px solid #fbbf24; }
+    .tag.difficulty-hard { background: rgba(248,113,113,0.1); color: var(--red); border: 1px solid var(--red); }
+    .reel-title { font-size: 18px; font-weight: 700; line-height: 1.3; margin-bottom: 8px; text-shadow: 0 2px 8px rgba(0,0,0,0.8); }
+    .reel-summary { font-size: 12px; color: var(--muted); line-height: 1.5; max-width: 600px; }
+
+    /* ── VIDEO POSTER ── */
+    .video-poster {
+      position: absolute; inset: 0;
+      cursor: pointer; overflow: hidden;
+      background: #000;
+      display: flex; align-items: center; justify-content: center;
+      z-index: 2;
+    }
+    .poster-img {
+      width: 100%; height: 100%; object-fit: cover;
+      transition: transform 0.4s ease, filter 0.4s ease;
+      filter: brightness(0.75);
+    }
+    .video-poster:hover .poster-img { transform: scale(1.03); filter: brightness(0.6); }
+    .poster-play-btn {
+      position: absolute; top: 50%; left: 50%;
+      transform: translate(-50%, -50%);
+      transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+      filter: drop-shadow(0 4px 20px rgba(0,0,0,0.5));
+    }
+    .video-poster:hover .poster-play-btn { transform: translate(-50%, -50%) scale(1.15); }
+    .poster-yt-badge {
+      position: absolute; bottom: 16px; right: 16px;
+      background: rgba(255,0,0,0.85);
+      color: #fff; font-size: 11px; font-weight: 700;
+      padding: 4px 10px; border-radius: 4px; letter-spacing: 0.5px;
+    }
+
+    .reel-loading {
+      scroll-snap-align: start;
+      height: calc(100vh - 60px);
+      display: flex; align-items: center; justify-content: center;
+      flex-direction: column; gap: 16px; color: var(--muted);
+    }
+    .loading-spinner {
+      width: 40px; height: 40px;
+      border: 3px solid var(--border);
+      border-top-color: var(--accent);
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+    }
+
+    /* ── SIDE PANEL ── */
+    #side-panel {
+      background: linear-gradient(145deg, var(--card), rgba(18, 30, 48, 0.4));
+      border-left: 1px solid rgba(255,255,255,0.24);
+      backdrop-filter: blur(18px) saturate(160%);
+      -webkit-backdrop-filter: blur(18px) saturate(160%);
+      overflow-y: auto;
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+    .panel-card {
+      background: linear-gradient(145deg, var(--card2), rgba(18, 30, 48, 0.4));
+      border: 1px solid rgba(255,255,255,0.28);
+      border-radius: var(--radius);
+      padding: 16px;
+      animation: floatCard 6s ease-in-out infinite;
+      box-shadow:
+        0 20px 28px -22px rgba(0,0,0,0.85),
+        inset 0 1px 0 rgba(255,255,255,0.12);
+    }
+    .panel-card:nth-child(2) { animation-delay: -2s; }
+    .panel-card:nth-child(3) { animation-delay: -4s; }
+    @keyframes floatCard {
+      0%, 100% { transform: translateY(0); }
+      50%       { transform: translateY(-3px); }
+    }
+    .panel-title {
+      font-size: 13px; font-weight: 700;
+      color: var(--accent); margin-bottom: 12px; letter-spacing: 0.5px;
+    }
+    .collapsible-trigger {
+      cursor: pointer; display: flex;
+      align-items: center; justify-content: space-between;
+      user-select: none;
+    }
+    .chevron { transition: transform 0.3s ease; }
+    .collapsible-trigger.open .chevron { transform: rotate(180deg); }
+    .collapsible-body { overflow: hidden; max-height: 1000px; transition: max-height 0.4s ease; }
+    .collapsible-body.closed { max-height: 0; }
+
+    /* ── SUMMARY ── */
+    .summary-section { margin-bottom: 12px; }
+    .summary-section strong { display: block; font-size: 11px; color: var(--muted); margin-bottom: 4px; text-transform: uppercase; letter-spacing: 0.5px; }
+    .summary-section p { font-size: 12px; line-height: 1.6; color: var(--text); }
+    .keywords-wrap { display: flex; flex-wrap: wrap; gap: 6px; }
+    .keyword-chip {
+      background: rgba(124,156,255,0.1);
+      border: 1px solid rgba(124,156,255,0.2);
+      color: var(--accent); border-radius: 50px;
+      padding: 3px 10px; font-size: 11px;
+    }
+
+    /* ── PROGRESS ── */
+    .progress-bar-wrap {
+      height: 4px; background: var(--bg);
+      border-radius: 2px; margin-top: 12px; overflow: hidden;
+    }
+    .progress-bar {
+      height: 100%;
+      background: linear-gradient(90deg, var(--accent), var(--accent2));
+      border-radius: 2px; width: 0%;
+      transition: width 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+      box-shadow: 0 0 8px rgba(124,156,255,0.6);
+    }
+    .progress-label { font-size: 11px; color: var(--muted); margin-top: 6px; text-align: right; }
+
+    /* ── GAMES CARD ── */
+    .games-card {
+      position: relative; overflow: hidden;
+      border-color: rgba(255,255,255,0.34);
+      background: linear-gradient(135deg, rgba(21,31,52,0.72), rgba(12,20,36,0.84));
+      padding: 20px;
+      display: flex; flex-direction: column; gap: 16px;
+    }
+    .games-glow {
+      position: absolute; top: -30px; right: -30px;
+      width: 120px; height: 120px; border-radius: 50%;
+      background: radial-gradient(circle, rgba(124,156,255,0.15), transparent 70%);
+      pointer-events: none;
+    }
+    .games-content { display: flex; align-items: center; gap: 14px; }
+    .games-icon { font-size: 38px; line-height: 1; animation: floatCard 3s ease-in-out infinite; }
+    .games-title { font-size: 16px; font-weight: 700; color: var(--text); margin-bottom: 3px; }
+    .games-sub { font-size: 12px; color: var(--muted); }
+    .games-btn {
+      display: block; width: 100%; text-align: center;
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
+      color: #0b0f19; font-family: 'Sora', sans-serif;
+      font-size: 14px; font-weight: 700;
+      padding: 12px 20px; border-radius: 50px;
+      text-decoration: none; letter-spacing: 0.3px;
+      transition: var(--transition);
+      box-shadow: 0 4px 16px rgba(124,156,255,0.3);
+    }
+    .games-btn:hover { transform: translateY(-2px); box-shadow: 0 8px 28px rgba(124,156,255,0.55); }
+
+    /* ── POMODORO ── */
+    #pomodoro-wrap {
+      position: fixed; bottom: 80px; right: 16px; z-index: 200;
+      display: flex; flex-direction: column; align-items: center; gap: 4px;
+    }
+    .pomo-ring { width: 90px; height: 90px; transform: rotate(-90deg); }
+    .pomo-bg { fill: none; stroke: var(--border); stroke-width: 8; }
+    .pomo-progress {
+      fill: none; stroke: url(#pomoGrad); stroke-width: 8;
+      stroke-linecap: round; stroke-dasharray: 339.29;
+      stroke-dashoffset: 339.29;
+      transition: stroke-dashoffset 1s linear;
+    }
+    .pomo-inner {
+      position: absolute; top: 0; left: 0;
+      width: 90px; height: 90px;
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center; gap: 2px;
+    }
+    .pomo-label { font-size: 9px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; }
+    .pomo-time { font-family: 'Space Mono', monospace; font-size: 14px; font-weight: 700; color: var(--accent); }
+
+    /* ── FOCUS MODE ── */
+    body.focus-mode #side-panel { display: none !important; }
+    body.focus-mode #main-layout { grid-template-columns: 1fr; }
+    body.focus-mode #topic-pills { display: none; }
+    body.focus-mode #pomodoro-wrap { display: flex !important; }
+    body.focus-mode #main-header { background: rgba(11,15,25,0.97); }
+
+    /* ── POPUP OVERLAYS ── */
+    .popup-overlay {
+      position: fixed; inset: 0; z-index: 500;
+      background: rgba(11,15,25,0.85);
+      backdrop-filter: blur(8px);
+      display: flex; align-items: center; justify-content: center;
+      animation: fadeIn 0.3s ease;
+    }
+    .popup-overlay.hidden { display: none; }
+    .popup-box {
+      background: linear-gradient(145deg, var(--card2), rgba(18, 30, 48, 0.4));
+      border: 1px solid rgba(255,255,255,0.3);
+      border-radius: 24px; padding: 32px;
+      max-width: 480px; width: 90%;
+      text-align: center;
+      animation: slideUp 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+      position: relative; z-index: 1;
+      max-height: 80vh; overflow-y: auto;
+    }
+    .popup-box h2 { font-size: 20px; font-weight: 700; margin-bottom: 12px; }
+    .popup-box h3 { font-size: 14px; font-weight: 600; color: var(--accent); margin-bottom: 10px; }
+    .popup-icon { font-size: 48px; margin-bottom: 12px; }
+
+    #keypoints-list {
+      text-align: left; margin-bottom: 20px;
+      display: flex; flex-direction: column; gap: 8px; list-style: none;
+    }
+    #keypoints-list li {
+      display: flex; align-items: flex-start; gap: 8px;
+      font-size: 13px; line-height: 1.5;
+      padding: 8px 12px; background: var(--card2);
+      border-radius: var(--radius-sm); border-left: 3px solid var(--accent);
+    }
+    .quiz-xp {
+      font-size: 11px; background: rgba(74,222,128,0.15);
+      color: var(--green); border-radius: 50px; padding: 2px 8px; font-weight: 700;
+    }
+    #quiz-question { font-size: 14px; margin-bottom: 12px; color: var(--text); }
+    .quiz-options { display: flex; flex-direction: column; gap: 8px; }
+    .quiz-opt {
+      padding: 10px 16px; background: var(--card2);
+      border: 1px solid var(--border); border-radius: var(--radius-sm);
+      cursor: pointer; font-size: 13px; text-align: left;
+      transition: var(--transition); color: var(--text);
+    }
+    .quiz-opt:hover { border-color: var(--accent); background: rgba(124,156,255,0.08); }
+    .quiz-opt.correct { border-color: var(--green); background: rgba(74,222,128,0.1); color: var(--green); }
+    .quiz-opt.wrong { border-color: var(--red); background: rgba(248,113,113,0.1); color: var(--red); }
+
+    /* ── FLASHCARD ── */
+    .flashcard-box { display: flex; flex-direction: column; align-items: center; gap: 16px; }
+    .flashcard { width: 300px; height: 180px; perspective: 1000px; cursor: pointer; }
+    .flashcard-inner {
+      position: relative; width: 100%; height: 100%;
+      transform-style: preserve-3d;
+      transition: transform 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+    .flashcard.flipped .flashcard-inner { transform: rotateY(180deg); }
+    .flashcard-front, .flashcard-back {
+      position: absolute; inset: 0; border-radius: var(--radius);
+      display: flex; align-items: center; justify-content: center;
+      padding: 24px; font-size: 14px; line-height: 1.5;
+      backface-visibility: hidden; -webkit-backface-visibility: hidden;
+    }
+    .flashcard-front { background: linear-gradient(135deg, var(--card2), #1a2540); border: 1px solid var(--border); color: var(--text); }
+    .flashcard-back { background: linear-gradient(135deg, rgba(124,156,255,0.1), rgba(167,139,250,0.1)); border: 1px solid var(--accent); color: var(--accent); transform: rotateY(180deg); }
+    .fc-hint { font-size: 11px; color: var(--muted); }
+
+    /* ── BADGE ── */
+    .badge-box { overflow: visible; }
+    .badge-icon { font-size: 80px; display: block; margin: 0 auto 16px; animation: badgePop 0.6s cubic-bezier(0.34, 1.56, 0.64, 1); }
+    @keyframes badgePop {
+      from { transform: scale(0) rotate(-20deg); opacity: 0; }
+      to   { transform: scale(1) rotate(0deg); opacity: 1; }
+    }
+    #confetti-canvas { position: fixed; inset: 0; pointer-events: none; z-index: 0; }
+
+    /* ── BREATHING ── */
+    #breathing-overlay {
+      position: fixed; inset: 0; z-index: 800;
+      background: rgba(11,15,25,0.97);
+      display: flex; align-items: center; justify-content: center;
+      animation: fadeIn 0.5s ease;
+    }
+    #breathing-overlay.hidden { display: none; }
+    .breathing-content { text-align: center; display: flex; flex-direction: column; align-items: center; gap: 20px; }
+    .breathing-circle-wrap { position: relative; width: 160px; height: 160px; display: flex; align-items: center; justify-content: center; }
+    .breathing-circle {
+      width: 100px; height: 100px; border-radius: 50%;
+      background: radial-gradient(circle, rgba(124,156,255,0.4), rgba(124,156,255,0.1));
+      border: 2px solid var(--accent);
+      animation: breathe 6s ease-in-out infinite;
+      box-shadow: 0 0 30px rgba(124,156,255,0.3);
+    }
+    @keyframes breathe {
+      0%, 100% { transform: scale(1); opacity: 0.6; box-shadow: 0 0 20px rgba(124,156,255,0.3); }
+      50%       { transform: scale(1.6); opacity: 1; box-shadow: 0 0 60px rgba(124,156,255,0.6); }
+    }
+    .breathing-text { position: absolute; font-size: 14px; font-weight: 600; color: var(--accent); }
+    .breathing-timer { font-family: 'Space Mono', monospace; font-size: 48px; font-weight: 700; color: var(--text); }
+    .breathing-caption { color: var(--muted); font-size: 14px; }
+
+    /* ── FAB ── */
+    .fab-btn {
+      position: fixed; bottom: 20px; right: 20px; z-index: 300;
+      width: 52px; height: 52px; border-radius: 50%; border: none;
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
+      color: #0b0f19; font-size: 22px; cursor: pointer;
+      box-shadow: 0 4px 20px rgba(124,156,255,0.4);
+      transition: var(--transition);
+      animation: pulseFloat 3s ease-in-out infinite;
+    }
+    .fab-btn:hover { transform: scale(1.1); box-shadow: 0 6px 30px rgba(124,156,255,0.6); }
+    @keyframes pulseFloat {
+      0%, 100% { transform: translateY(0) scale(1); }
+      50%       { transform: translateY(-4px) scale(1.03); }
+    }
+
+    /* ── VOICE INDICATOR ── */
+    #voice-indicator {
+      position: fixed; top: 70px; left: 50%; transform: translateX(-50%);
+      background: rgba(15, 29, 49, 0.85); border: 1px solid rgba(196,230,255,0.74);
+      border-radius: 50px; padding: 6px 16px;
+      display: flex; align-items: center; gap: 8px;
+      font-size: 12px; z-index: 150; box-shadow: var(--glow);
+      animation: fadeIn 0.3s ease;
+    }
+    #voice-indicator.hidden { display: none; }
+    .voice-dot {
+      width: 8px; height: 8px; border-radius: 50%; background: var(--red);
+      animation: voicePulse 1s ease-in-out infinite;
+    }
+    @keyframes voicePulse {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50%       { opacity: 0.4; transform: scale(1.4); }
+    }
+
+    /* ── UTILITIES ── */
+    .hidden { display: none !important; }
+    @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+    @keyframes slideUp { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    @keyframes xpPop {
+      0%   { transform: scale(1); }
+      50%  { transform: scale(1.4); color: #fbbf24; }
+      100% { transform: scale(1); }
+    }
+    .xp-pop { animation: xpPop 0.4s ease; }
+
+    @media (max-width: 900px) {
+      #main-layout { grid-template-columns: 1fr; }
+      #side-panel { display: none; }
+    }
+  </style>
+</head>
+<body>
+<div class="spline-bg" aria-hidden="true">
+  <spline-viewer url="https://prod.spline.design/7HcFWOtgxYDGEdTI/scene.splinecode"></spline-viewer>
+</div>
+
+<!-- ═══════════════════════ BREATHING RESET OVERLAY ═══════════════════════ -->
+<div id="breathing-overlay" class="hidden">
+  <div class="breathing-content">
+    <div class="breathing-circle-wrap">
+      <div class="breathing-circle"></div>
+      <span class="breathing-text">Breathe</span>
+    </div>
+    <div class="breathing-timer" id="breathing-timer">30</div>
+    <p class="breathing-caption">Inhale... hold... exhale...</p>
+    <button id="skip-breathing" class="btn-ghost small">Skip</button>
+  </div>
+</div>
+
+<!-- ═══════════════════════ APP ═══════════════════════ -->
+<div id="app">
+
+  <!-- ── HEADER ── -->
+  <header id="main-header">
+    <div class="header-left">
+      <div class="logo">⚡ FlowLearn</div>
+      <div class="topic-pills" id="topic-pills">
+        <button class="pill active" data-topic="science">🔬 Science</button>
+        <button class="pill" data-topic="technology">💻 Tech</button>
+        <button class="pill" data-topic="education">📚 Education</button>
+        <button class="pill" data-topic="productivity">⚡ Productivity</button>
+        <button class="pill" data-topic="sci-fi">🚀 Sci-Fi</button>
+      </div>
+    </div>
+    <div class="header-right">
+      <div class="xp-badge" id="xp-badge">
+        <span class="xp-icon">⭐</span>
+        <span class="xp-value" id="xp-display">0</span> XP
+      </div>
+      <div class="streak-badge" id="streak-badge">
+        <span>🔥</span>
+        <span id="streak-display">0</span> day streak
+      </div>
+      <button id="focus-mode-btn" class="btn-accent">⚡ Focus Mode</button>
+      <button id="reset-focus-btn" class="btn-ghost">🧘 Reset</button>
+    </div>
+  </header>
+
+  <!-- ── MAIN LAYOUT ── -->
+  <main id="main-layout">
+
+    <!-- LEFT: Reel Feed -->
+    <section id="reel-container"></section>
+
+    <!-- RIGHT: Side Panel -->
+    <aside id="side-panel">
+
+      <!-- Summary Panel -->
+      <div class="panel-card" id="summary-card">
+        <div class="panel-title collapsible-trigger" data-target="summary-body">
+          📋 Summary <span class="chevron">▼</span>
+        </div>
+        <div id="summary-body" class="collapsible-body">
+          <div class="summary-section">
+            <strong>Summary</strong>
+            <p id="summary-text">Watch a video to see its summary.</p>
+          </div>
+          <div class="summary-section">
+            <strong>Keywords</strong>
+            <div id="keywords-wrap" class="keywords-wrap"></div>
+          </div>
+          <div class="summary-section">
+            <strong>Takeaway</strong>
+            <p id="takeaway-text">—</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- XP Progress Panel -->
+      <div class="panel-card" id="stats-card">
+        <div class="panel-title">🏆 Your Progress</div>
+        <div class="progress-bar-wrap">
+          <div class="progress-bar" id="xp-progress-bar"></div>
+        </div>
+        <div class="progress-label">Level <span id="level-display">1</span> — <span id="xp-to-next">100</span> XP to next level</div>
+        <span id="stat-watched" style="display:none">0</span>
+        <span id="stat-skipped" style="display:none">0</span>
+        <span id="stat-focus"   style="display:none">0m</span>
+      </div>
+
+      <!-- Play Edu-Games Button -->
+      <div class="panel-card games-card" id="games-card">
+        <div class="games-glow"></div>
+        <div class="games-content">
+          <div class="games-icon">🎮</div>
+          <div class="games-text">
+            <div class="games-title">Play Edu-Games</div>
+            <div class="games-sub">Learn while you play!</div>
+          </div>
+        </div>
+        <a href="https://www.crazygames.com/search?q=education%20games" target="_blank" rel="noopener noreferrer" class="games-btn">
+          Play Now →
+        </a>
+      </div>
+
+    </aside>
+  </main>
+
+  <!-- ── POMODORO ── -->
+  <div id="pomodoro-wrap" class="hidden">
+    <svg class="pomo-ring" viewBox="0 0 120 120" style="position:relative">
+      <defs>
+        <linearGradient id="pomoGrad">
+          <stop offset="0%" stop-color="#7c9cff"/>
+          <stop offset="100%" stop-color="#a78bfa"/>
+        </linearGradient>
+      </defs>
+      <circle class="pomo-bg" cx="60" cy="60" r="54"/>
+      <circle class="pomo-progress" id="pomo-circle" cx="60" cy="60" r="54"/>
+    </svg>
+    <div class="pomo-inner">
+      <div class="pomo-label" id="pomo-label">FOCUS</div>
+      <div class="pomo-time" id="pomo-time">25:00</div>
+    </div>
+    <button id="pomo-toggle" class="btn-accent small" style="margin-top:8px">▶ Start</button>
+  </div>
+
+  <!-- ── FAB RESET ── -->
+  <button id="reset-float-btn" class="fab-btn" title="ADHD Reset">🧘</button>
+
+</div>
+
+<!-- ═══════════════════════ KEY POINTS POPUP ═══════════════════════ -->
+<div id="keypoints-popup" class="popup-overlay hidden">
+  <div class="popup-box">
+    <div class="popup-icon">🎉</div>
+    <h2>Video Complete! +10 XP</h2>
+    <h3>Key Points</h3>
+    <ul id="keypoints-list"></ul>
+    <div id="quiz-section">
+      <h3>Quick Quiz <span class="quiz-xp">+20 XP</span></h3>
+      <p id="quiz-question"></p>
+      <div id="quiz-options" class="quiz-options"></div>
+    </div>
+    <button id="close-popup" class="btn-ghost small" style="margin-top:16px">Continue →</button>
+  </div>
+</div>
+
+<!-- ═══════════════════════ FLASHCARD POPUP ═══════════════════════ -->
+<div id="flashcard-popup" class="popup-overlay hidden">
+  <div class="popup-box flashcard-box">
+    <h2>🧠 Memory Booster</h2>
+    <div class="flashcard" id="flashcard">
+      <div class="flashcard-inner">
+        <div class="flashcard-front" id="fc-front"></div>
+        <div class="flashcard-back" id="fc-back"></div>
+      </div>
+    </div>
+    <p class="fc-hint">Click card to flip</p>
+    <button id="next-flashcard" class="btn-accent small">Next Card</button>
+    <button id="close-flashcard" class="btn-ghost small">Done</button>
+  </div>
+</div>
+
+<!-- ═══════════════════════ BADGE POPUP ═══════════════════════ -->
+<div id="badge-popup" class="popup-overlay hidden">
+  <div class="popup-box badge-box">
+    <div class="badge-icon" id="badge-icon">🏅</div>
+    <h2>Badge Unlocked!</h2>
+    <p id="badge-name"></p>
+    <button id="close-badge" class="btn-primary">Awesome!</button>
+  </div>
+  <canvas id="confetti-canvas"></canvas>
+</div>
+
+<!-- ═══════════════════════ VOICE INDICATOR ═══════════════════════ -->
+<div id="voice-indicator" class="hidden">
+  <span class="voice-dot"></span>
+  <span id="voice-cmd-text">Listening...</span>
+</div>
+
+<script>
+'use strict';
+
+// ── STATE ──
+const State = {
+  demoMode: false,
+  currentTopic: 'science',
+  currentReelIndex: 0,
+  videosWatched: 0,
+  videosSkipped: 0,
+  focusSeconds: 0,
+  reelsSinceFlashcard: 0,
+  focusModeOn: false,
+  pomodoroActive: false,
+  pomodoroIsBreak: false,
+  pomodoroSeconds: 25 * 60,
+  iframes: {},
+  completedByIndex: {},
+  youtubeNextPageTokenByTopic: {},
+  loadedVideoIdsByTopic: {},
+  demoPoolsByTopic: {},
+  demoCursorByTopic: {},
+  xp: 0,
+  streak: 0,
+  lastDate: null,
+  badges: [],
+  lastLevel: 1,
+};
+
+const XP_LEVELS = [100, 250, 500, 900, 1500, 2500];
+
+function loadStorage() {
+  try {
+    const s = JSON.parse(localStorage.getItem('flowlearn_state') || '{}');
+    State.xp        = s.xp        || 0;
+    State.streak    = s.streak    || 0;
+    State.lastDate  = s.lastDate  || null;
+    State.badges    = s.badges    || [];
+    State.lastLevel = s.lastLevel || 1;
+    checkStreak();
+  } catch(e) {}
+}
+
+function saveStorage() {
+  try {
+    localStorage.setItem('flowlearn_state', JSON.stringify({
+      xp: State.xp, streak: State.streak,
+      lastDate: State.lastDate, badges: State.badges, lastLevel: State.lastLevel,
+    }));
+  } catch(e) {}
+}
+
+function checkStreak() {
+  const today     = new Date().toDateString();
+  const yesterday = new Date(Date.now() - 86400000).toDateString();
+  if (State.lastDate === today) return;
+  State.streak   = State.lastDate === yesterday ? State.streak + 1 : 1;
+  State.lastDate = today;
+  saveStorage();
+}
+
+// ── DEMO VIDEOS ──
+const DEMO_VIDEOS = [
+  {
+    id: 'dQw4w9WgXcQ', title: 'How the Universe Works — Space & Time Explained',
+    topic: 'science', difficulty: 'easy',
+    summary: 'An engaging overview of how space, time, and matter interact at cosmic scales.',
+    keywords: ['Space', 'Time', 'Physics', 'Universe'],
+    keyPoints: ['Space-time is a fabric that can bend with mass','Light always travels at the same speed','The universe is ~13.8 billion years old'],
+    takeaway: 'Understanding the universe starts with understanding light and gravity.',
+    quiz: { q: 'What does mass do to space-time?', opts: ['Bends it','Freezes it','Expands it','Destroys it'], answer: 0 },
+    flashcard: { q: 'What is the speed of light?', a: '~299,792 km/s (roughly 300,000 km/s)' },
+  },
+  {
+    id: 'ZzKGnuskf9I', title: 'The Future of AI — What Comes Next?',
+    topic: 'technology', difficulty: 'medium',
+    summary: 'Exploring how artificial intelligence is reshaping industries, creativity, and human potential.',
+    keywords: ['AI', 'Machine Learning', 'Future', 'Automation'],
+    keyPoints: ['AI models are now multimodal','Automation will transform knowledge work','Human-AI collaboration is the next frontier'],
+    takeaway: 'Adapting to AI means learning to collaborate with it, not compete.',
+    quiz: { q: 'What does multimodal AI mean?', opts: ['Works on multiple devices','Handles text, images & audio','Runs offline','Has multiple personalities'], answer: 1 },
+    flashcard: { q: 'What is machine learning?', a: 'Training computers to learn from data without explicit programming.' },
+  },
+  {
+    id: 'lTTajzrSkCw', title: 'Deep Focus Techniques for ADHD Brains',
+    topic: 'productivity', difficulty: 'easy',
+    summary: 'Science-backed strategies to help neurodivergent thinkers achieve deep focus states.',
+    keywords: ['ADHD', 'Focus', 'Habits', 'Neuroscience'],
+    keyPoints: ['Environment design beats willpower','Body doubling increases focus by 200%','Dopamine rewards make habits stick'],
+    takeaway: 'Design your environment first — your habits will follow naturally.',
+    quiz: { q: 'What is body doubling?', opts: ['Using two screens','Working near another person','Taking double breaks','Doubling your goals'], answer: 1 },
+    flashcard: { q: 'What is the Pomodoro Technique?', a: '25 min focused work, 5 min break. Repeat 4x, then take a long break.' },
+  },
+  {
+    id: 'ukzFI9rgwfU', title: 'Quantum Computing — Explained Simply',
+    topic: 'science', difficulty: 'medium',
+    summary: 'Quantum computers use qubits to process information in fundamentally different ways.',
+    keywords: ['Quantum', 'Qubits', 'Superposition', 'Entanglement'],
+    keyPoints: ['Qubits can be 0, 1, or both at once','Entanglement links qubits across distances','Quantum computers excel at optimization'],
+    takeaway: 'Quantum computing will revolutionize cryptography and drug discovery.',
+    quiz: { q: 'What is superposition?', opts: ['Two computers running','Being 0 and 1 simultaneously','Quantum internet','A new language'], answer: 1 },
+    flashcard: { q: 'What is a qubit?', a: 'A quantum bit — the basic unit of quantum information, existing in superposition.' },
+  },
+  {
+    id: 'nHfWaezroE8', title: 'Learning How to Learn — Meta-Cognition',
+    topic: 'education', difficulty: 'easy',
+    summary: 'Meta-cognition — thinking about thinking — is the most powerful skill for lifelong learning.',
+    keywords: ['Learning', 'Memory', 'Meta-cognition', 'Spaced Repetition'],
+    keyPoints: ['Spaced repetition beats cramming by 200%','Feynman technique: explain it simply','Active recall builds stronger neural pathways'],
+    takeaway: 'How you learn matters more than how much you study.',
+    quiz: { q: 'What does spaced repetition mean?', opts: ['Reviewing in increasing intervals','Studying in space','Spacing out','Random reviewing'], answer: 0 },
+    flashcard: { q: 'What is the Feynman Technique?', a: 'Explain a concept as if teaching a child — simplicity reveals gaps in understanding.' },
+  },
+  {
+    id: 'CPRR-7E8a9Y', title: 'Mars Colonization — Engineering Challenges',
+    topic: 'sci-fi', difficulty: 'hard',
+    summary: 'The engineering challenges of living on Mars: radiation, atmosphere, food and psychology.',
+    keywords: ['Mars', 'Space Colonization', 'Engineering', 'Terraforming'],
+    keyPoints: ['Mars has 38% of Earth gravity','Thin CO2 atmosphere offers little radiation protection','ISRU is key to survival'],
+    takeaway: 'Mars colonization requires solving biology, psychology, and engineering simultaneously.',
+    quiz: { q: 'What percentage of Earth gravity does Mars have?', opts: ['10%','38%','62%','80%'], answer: 1 },
+    flashcard: { q: 'What does ISRU stand for?', a: 'In-Situ Resource Utilization — using local Mars resources for survival.' },
+  },
+];
+
+// ── DOM REFS ──
+const $ = id => document.getElementById(id);
+const D = {
+  reelContainer:   $('reel-container'),
+  summaryText:     $('summary-text'),
+  keywordsWrap:    $('keywords-wrap'),
+  takeawayText:    $('takeaway-text'),
+  statWatched:     $('stat-watched'),
+  statSkipped:     $('stat-skipped'),
+  statFocus:       $('stat-focus'),
+  xpDisplay:       $('xp-display'),
+  xpProgress:      $('xp-progress-bar'),
+  levelDisplay:    $('level-display'),
+  xpToNext:        $('xp-to-next'),
+  streakDisplay:   $('streak-display'),
+  focusModeBtn:    $('focus-mode-btn'),
+  resetFocusBtn:   $('reset-focus-btn'),
+  resetFloatBtn:   $('reset-float-btn'),
+  breathingOverlay:$('breathing-overlay'),
+  breathingTimer:  $('breathing-timer'),
+  skipBreathing:   $('skip-breathing'),
+  pomodoroWrap:    $('pomodoro-wrap'),
+  pomoCircle:      $('pomo-circle'),
+  pomoTime:        $('pomo-time'),
+  pomoLabel:       $('pomo-label'),
+  pomoToggle:      $('pomo-toggle'),
+  keypointsPopup:  $('keypoints-popup'),
+  keypointsList:   $('keypoints-list'),
+  quizQuestion:    $('quiz-question'),
+  quizOptions:     $('quiz-options'),
+  closePopup:      $('close-popup'),
+  flashcardPopup:  $('flashcard-popup'),
+  flashcard:       $('flashcard'),
+  fcFront:         $('fc-front'),
+  fcBack:          $('fc-back'),
+  nextFlashcard:   $('next-flashcard'),
+  closeFlashcard:  $('close-flashcard'),
+  badgePopup:      $('badge-popup'),
+  badgeIcon:       $('badge-icon'),
+  badgeName:       $('badge-name'),
+  closeBadge:      $('close-badge'),
+  voiceIndicator:  $('voice-indicator'),
+  voiceCmdText:    $('voice-cmd-text'),
+  topicPills:      document.querySelectorAll('.pill'),
+};
+
+// ── INIT ──
+document.addEventListener('DOMContentLoaded', () => {
+  loadStorage();
+  updateXPUI();
+  updateStreakUI();
+  startFocusTimer();
+
+  // Start immediately with API
+  loadReels(true);
+
+  D.topicPills.forEach(pill => {
+    pill.addEventListener('click', () => {
+      D.topicPills.forEach(p => p.classList.remove('active'));
+      pill.classList.add('active');
+      State.currentTopic = pill.dataset.topic;
+      loadReels(true);
+    });
+  });
+
+  D.focusModeBtn.addEventListener('click', toggleFocusMode);
+  if (D.resetFocusBtn)  D.resetFocusBtn.addEventListener('click', openBreathing);
+  if (D.resetFloatBtn)  D.resetFloatBtn.addEventListener('click', openBreathing);
+  if (D.skipBreathing)  D.skipBreathing.addEventListener('click', closeBreathing);
+
+  document.querySelectorAll('.collapsible-trigger').forEach(el => {
+    el.addEventListener('click', function() {
+      const target = document.getElementById(this.dataset.target);
+      if (!target) return;
+      this.classList.toggle('open');
+      target.classList.toggle('closed');
+    });
+  });
+
+  if (D.pomoToggle)     D.pomoToggle.addEventListener('click', togglePomodoro);
+  if (D.closePopup)     D.closePopup.addEventListener('click', () => D.keypointsPopup.classList.add('hidden'));
+  if (D.closeFlashcard) D.closeFlashcard.addEventListener('click', () => D.flashcardPopup.classList.add('hidden'));
+  if (D.closeBadge)     D.closeBadge.addEventListener('click', () => D.badgePopup.classList.add('hidden'));
+  if (D.flashcard)      D.flashcard.addEventListener('click', () => D.flashcard.classList.toggle('flipped'));
+  if (D.nextFlashcard)  D.nextFlashcard.addEventListener('click', advanceFlashcard);
+
+  initVoiceCommands();
+  D.reelContainer.addEventListener('scroll', handleReelScroll);
+  window.addEventListener('message', handleYTMessage);
+});
+
+// ── REEL LOADING ──
+let loadingReels = false;
+let currentVideoData = [];
+let ytApiPromise = null;
+
+function ensureYouTubeAPI() {
+  if (window.YT && window.YT.Player) {
+    return Promise.resolve(window.YT);
+  }
+
+  if (ytApiPromise) return ytApiPromise;
+
+  ytApiPromise = new Promise((resolve, reject) => {
+    const existing = document.querySelector('script[src="https://www.youtube.com/iframe_api"]');
+    if (!existing) {
+      const script = document.createElement('script');
+      script.src = 'https://www.youtube.com/iframe_api';
+      script.async = true;
+      script.onerror = () => reject(new Error('YouTube IFrame API failed to load.'));
+      document.head.appendChild(script);
+    }
+
+    const previous = window.onYouTubeIframeAPIReady;
+    window.onYouTubeIframeAPIReady = function() {
+      if (typeof previous === 'function') {
+        try { previous(); } catch (_err) {}
+      }
+      resolve(window.YT);
+    };
+
+    const poll = () => {
+      if (window.YT && window.YT.Player) {
+        resolve(window.YT);
+        return;
+      }
+      setTimeout(poll, 120);
+    };
+    poll();
+  });
+
+  return ytApiPromise;
+}
+
+function loadReels(reset = false) {
+  if (reset) {
+    Object.keys(State.iframes).forEach((key) => {
+      unloadVideoAt(Number(key));
+    });
+    D.reelContainer.innerHTML = '';
+    currentVideoData = [];
+    State.currentReelIndex = 0;
+    State.iframes = {};
+    State.completedByIndex = {};
+    State.youtubeNextPageTokenByTopic = {};
+    State.loadedVideoIdsByTopic = {};
+    State.demoPoolsByTopic = {};
+    State.demoCursorByTopic = {};
+  }
+  if (loadingReels) return;
+  loadingReels = true;
+
+  const loader = document.createElement('div');
+  loader.className = 'reel-loading';
+  loader.innerHTML = '<div class="loading-spinner"></div><span>Loading reels...</span>';
+  D.reelContainer.appendChild(loader);
+
+  fetchYouTubeVideos(State.currentTopic)
+    .then(videos => {
+      loader.remove();
+      renderVideos(videos);
+      loadingReels = false;
+    })
+    .catch(() => {
+      loader.remove();
+      renderDemoReels();
+      loadingReels = false;
+    });
+}
+
+function renderDemoReels() {
+  const topic = State.currentTopic;
+  if (!State.demoPoolsByTopic[topic] || !State.demoPoolsByTopic[topic].length) {
+    const filtered = DEMO_VIDEOS.filter(v => v.topic === topic);
+    const source = filtered.length ? filtered : DEMO_VIDEOS;
+    State.demoPoolsByTopic[topic] = shuffle([...source]);
+    State.demoCursorByTopic[topic] = 0;
+  }
+
+  const pool = State.demoPoolsByTopic[topic];
+  const batchSize = 4;
+  let cursor = State.demoCursorByTopic[topic] || 0;
+  let batch = pool.slice(cursor, cursor + batchSize);
+  cursor += batch.length;
+
+  if (batch.length < batchSize) {
+    const reshuffled = shuffle([...pool]);
+    State.demoPoolsByTopic[topic] = reshuffled;
+    const remainder = batchSize - batch.length;
+    batch = batch.concat(reshuffled.slice(0, remainder));
+    cursor = remainder;
+  }
+
+  State.demoCursorByTopic[topic] = cursor;
+  renderVideos(batch.map(v => ({ ...v })));
+}
+
+function getTopicVideoSet(topic) {
+  if (!State.loadedVideoIdsByTopic[topic]) {
+    State.loadedVideoIdsByTopic[topic] = new Set();
+  }
+  return State.loadedVideoIdsByTopic[topic];
+}
+
+async function fetchYouTubeVideos(topic, attempt = 0) {
+  const searchTerms = {
+    science: 'science explained short',
+    technology: 'technology innovation explained',
+    education: 'learn something new educational',
+    productivity: 'productivity tips focus',
+    'sci-fi': 'science fiction explained',
+  };
+  const q = searchTerms[topic] || topic;
+  const targetBatchSize = 6;
+  const nextPageToken = State.youtubeNextPageTokenByTopic[topic];
+  const loadedIds = getTopicVideoSet(topic);
+
+  if (nextPageToken === null && loadedIds.size) {
+    throw new Error('No more topic videos');
+  }
+
+  let url = `/api/youtube-search?q=${encodeURIComponent(q)}&maxResults=12`;
+  if (nextPageToken) {
+    url += `&pageToken=${encodeURIComponent(nextPageToken)}`;
+  }
+
+  const res = await fetch(url);
+  if (!res.ok) throw new Error('API error ' + res.status);
+  const data = await res.json();
+  if (!data.items || !data.items.length) throw new Error('No results');
+  State.youtubeNextPageTokenByTopic[topic] = data.nextPageToken || null;
+
+  const mapped = data.items
+    .filter(item => item?.id?.videoId)
+    .map((item, i) => {
+      const words = item.snippet.title.split(' ').filter(w => w.length > 4);
+      return {
+        id: item.id.videoId,
+        title: item.snippet.title,
+        topic: topic,
+        difficulty: ['easy','medium','hard'][i % 3],
+        summary: (item.snippet.description || 'Educational video about ' + topic).slice(0, 140) + '...',
+        keywords: words.slice(0, 4),
+        keyPoints: generateKeyPoints(item.snippet.title),
+        takeaway: 'Key insight: ' + item.snippet.title.split(' ').slice(0, 6).join(' ') + '...',
+        quiz: generateQuiz(item.snippet.title),
+        flashcard: {
+          q: 'What is the main concept in: "' + item.snippet.title.slice(0, 40) + '"?',
+          a: (item.snippet.description || 'An important educational concept.').slice(0, 100),
+        },
+      };
+    });
+
+  const batchSeen = new Set();
+  const fresh = mapped.filter((video) => {
+    if (batchSeen.has(video.id)) return false;
+    batchSeen.add(video.id);
+    return !loadedIds.has(video.id);
+  });
+
+  if (fresh.length < targetBatchSize && State.youtubeNextPageTokenByTopic[topic] && attempt < 2) {
+    const nextFresh = await fetchYouTubeVideos(topic, attempt + 1).catch(() => []);
+    const merged = [...fresh];
+    const seen = new Set(merged.map(v => v.id));
+    nextFresh.forEach((video) => {
+      if (!seen.has(video.id) && merged.length < targetBatchSize) {
+        merged.push(video);
+        seen.add(video.id);
+      }
+    });
+    if (merged.length) return merged;
+  }
+
+  if (!fresh.length) {
+    throw new Error('No new videos');
+  }
+
+  return fresh;
+}
+
+function renderVideos(videos) {
+  const loadedIds = getTopicVideoSet(State.currentTopic);
+  videos.forEach(v => {
+    loadedIds.add(v.id);
+    currentVideoData.push(v);
+    renderReelCard(v, currentVideoData.length - 1);
+  });
+}
+
+function shuffle(list) {
+  for (let i = list.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [list[i], list[j]] = [list[j], list[i]];
+  }
+  return list;
+}
+
+function renderReelCard(video, index) {
+  const card = document.createElement('div');
+  card.className = 'reel-card';
+  card.dataset.index = index;
+
+  const thumb = `https://img.youtube.com/vi/${video.id}/maxresdefault.jpg`;
+  const thumbFallback = `https://img.youtube.com/vi/${video.id}/hqdefault.jpg`;
+
+  card.innerHTML = `
+    <div class="reel-video-wrap" id="wrap-${index}">
+      <div class="video-poster" id="poster-${index}" data-index="${index}" data-videoid="${video.id}">
+        <img
+          src="${thumb}"
+          onerror="this.src='${thumbFallback}'"
+          alt="${escapeHtml(video.title)}"
+          class="poster-img"
+        />
+        <div class="poster-play-btn">
+          <svg viewBox="0 0 80 80" width="80" height="80">
+            <circle cx="40" cy="40" r="38" fill="rgba(0,0,0,0.6)" stroke="rgba(255,255,255,0.3)" stroke-width="1.5"/>
+            <polygon points="30,22 62,40 30,58" fill="white"/>
+          </svg>
+        </div>
+        <div class="poster-yt-badge">▶ YouTube</div>
+      </div>
+      <div class="reel-overlay"></div>
+      <div class="reel-info">
+        <div class="reel-tags">
+          <span class="tag topic">${video.topic}</span>
+          <span class="tag difficulty-${video.difficulty}">${video.difficulty}</span>
+        </div>
+        <div class="reel-title">${escapeHtml(video.title)}</div>
+        <div class="reel-summary">${escapeHtml(video.summary)}</div>
+      </div>
+    </div>
+  `;
+
+  D.reelContainer.appendChild(card);
+
+  const poster = card.querySelector(`#poster-${index}`);
+  poster.addEventListener('click', () => createOrPlayVideo(index, video.id));
+
+  State.iframes[index] = null;
+
+  const observer = new IntersectionObserver(entries => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) onReelVisible(index, video);
+    });
+  }, { root: D.reelContainer, threshold: 0.6 });
+  observer.observe(card);
+}
+
+function createOrPlayVideo(index, videoId) {
+  const wrap   = document.getElementById(`wrap-${index}`);
+  const poster = document.getElementById(`poster-${index}`);
+  if (!wrap || !poster) return;
+
+  const existing = State.iframes[index];
+  if (existing && existing.type === 'yt' && existing.player && typeof existing.player.playVideo === 'function') {
+    try { existing.player.playVideo(); } catch (_err) {}
+    if (poster.parentNode) {
+      poster.style.opacity = '0';
+      poster.style.transition = 'opacity 0.25s ease';
+      setTimeout(() => poster.remove(), 250);
+    }
+    return;
+  }
+
+  if (poster.parentNode) {
+    poster.style.opacity = '0';
+    poster.style.transition = 'opacity 0.3s';
+    setTimeout(() => poster.remove(), 300);
+  }
+
+  const mount = document.createElement('div');
+  mount.id = `yt-player-${index}`;
+  mount.style.cssText = 'position:absolute;inset:0;width:100%;height:100%;background:#000;';
+  wrap.appendChild(mount);
+
+  ensureYouTubeAPI()
+    .then((YTRef) => {
+      const player = new YTRef.Player(mount.id, {
+        videoId,
+        playerVars: {
+          autoplay: 1,
+          rel: 0,
+          modestbranding: 1,
+          controls: 1,
+          playsinline: 1,
+          fs: 1,
+          origin: location.origin
+        },
+        events: {
+          onReady: (ev) => {
+            try { ev.target.playVideo(); } catch (_err) {}
+          },
+          onStateChange: (ev) => {
+            if (ev.data === YTRef.PlayerState.ENDED) {
+              markVideoCompleted(index);
+            }
+          },
+          onError: () => {
+            fallbackToStandardEmbed(index, videoId, mount, wrap);
+          }
+        }
+      });
+      State.iframes[index] = { type: 'yt', player, mount };
+    })
+    .catch(() => {
+      fallbackToStandardEmbed(index, videoId, mount, wrap);
+    });
+}
+
+function fallbackToStandardEmbed(index, videoId, mount, wrap) {
+  try {
+    if (mount && mount.parentNode) mount.remove();
+  } catch (_err) {}
+
+  const iframe = document.createElement('iframe');
+  iframe.id = `iframe-${index}`;
+  iframe.src = `https://www.youtube.com/embed/${videoId}?enablejsapi=1&autoplay=1&rel=0&modestbranding=1&controls=1&playsinline=1&fs=1&origin=${location.origin}`;
+  iframe.referrerPolicy = 'strict-origin-when-cross-origin';
+  iframe.setAttribute('allow', 'accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; fullscreen');
+  iframe.setAttribute('allowfullscreen', '');
+  iframe.style.cssText = 'position:absolute;inset:0;width:100%;height:100%;border:none;background:#000;';
+  wrap.appendChild(iframe);
+  State.iframes[index] = { type: 'iframe', iframe };
+}
+
+function unloadVideoAt(index) {
+  const slot = State.iframes[index];
+  if (!slot) return;
+
+  if (slot.type === 'yt' && slot.player) {
+    try { slot.player.stopVideo(); } catch (_err) {}
+    try { slot.player.destroy(); } catch (_err) {}
+  }
+
+  if (slot.type === 'iframe' && slot.iframe) {
+    try { slot.iframe.src = ''; } catch (_err) {}
+    try { slot.iframe.remove(); } catch (_err) {}
+  }
+
+  if (slot.mount) {
+    try { slot.mount.remove(); } catch (_err) {}
+  }
+
+  State.iframes[index] = null;
+}
+
+function markVideoCompleted(index) {
+  if (State.completedByIndex[index]) return;
+  State.completedByIndex[index] = true;
+  const video = currentVideoData[index];
+  if (!video) return;
+
+  State.videosWatched++;
+  if (D.statWatched) D.statWatched.textContent = State.videosWatched;
+  addXP(10, '+10 XP — Video Complete! 🎬');
+  showKeyPoints(video);
+}
+
+function escapeHtml(str) {
+  return (str || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+// ── SCROLL ──
+let scrollTimeout = null;
+function handleReelScroll() {
+  clearTimeout(scrollTimeout);
+  scrollTimeout = setTimeout(() => {
+    const nearEnd = D.reelContainer.scrollTop + D.reelContainer.clientHeight >= D.reelContainer.scrollHeight - 400;
+    if (nearEnd) loadReels(false);
+  }, 150);
+}
+
+function onReelVisible(index, video) {
+  const prevIndex = State.currentReelIndex;
+  if (prevIndex !== index && State.iframes[prevIndex]) {
+    unloadVideoAt(prevIndex);
+  }
+  State.currentReelIndex = index;
+  updateSummaryPanel(video);
+  if (index > prevIndex + 1) {
+    State.videosSkipped++;
+    if (D.statSkipped) D.statSkipped.textContent = State.videosSkipped;
+  }
+  State.reelsSinceFlashcard++;
+  if (State.reelsSinceFlashcard >= 3) {
+    State.reelsSinceFlashcard = 0;
+    setTimeout(() => showFlashcard(video.flashcard), 2500);
+  }
+}
+
+// ── YT MESSAGE ──
+function handleYTMessage(event) {
+  try {
+    const data = JSON.parse(event.data);
+    if (data.info && data.info.playerState === 0) {
+      markVideoCompleted(State.currentReelIndex);
+    }
+  } catch(e) {}
+}
+
+// ── KEY POINTS & QUIZ ──
+function showKeyPoints(video) {
+  D.keypointsList.innerHTML = video.keyPoints.map(p => `<li>✦ ${escapeHtml(p)}</li>`).join('');
+  D.quizQuestion.textContent = video.quiz.q;
+  D.quizOptions.innerHTML = '';
+  let answered = false;
+  video.quiz.opts.forEach((opt, i) => {
+    const btn = document.createElement('button');
+    btn.className = 'quiz-opt';
+    btn.textContent = `${String.fromCharCode(65 + i)}. ${opt}`;
+    btn.addEventListener('click', () => {
+      if (answered) return;
+      answered = true;
+      handleQuizAnswer(i, video.quiz.answer);
+    });
+    D.quizOptions.appendChild(btn);
+  });
+  D.keypointsPopup.classList.remove('hidden');
+}
+
+function handleQuizAnswer(selected, correct) {
+  const btns = D.quizOptions.querySelectorAll('.quiz-opt');
+  btns.forEach((b, i) => {
+    b.disabled = true;
+    if (i === correct) b.classList.add('correct');
+    else if (i === selected) b.classList.add('wrong');
+  });
+  if (selected === correct) addXP(20, '+20 XP — Correct Answer! ✅');
+  else showToast('Not quite — the correct answer is highlighted ✦', '💡');
+}
+
+// ── XP & GAMIFICATION ──
+function addXP(amount, message) {
+  State.xp += amount;
+  saveStorage();
+  updateXPUI(true);
+  showToast(message, '⭐');
+  checkLevelUp();
+  checkBadges();
+}
+
+function updateXPUI(animate = false) {
+  if (!D.xpDisplay) return;
+  const target = State.xp;
+  if (animate) {
+    animateCounter(D.xpDisplay, parseInt(D.xpDisplay.textContent) || 0, target, 600);
+    const badge = D.xpDisplay.closest('.xp-badge');
+    if (badge) {
+      badge.classList.remove('xp-pop');
+      void badge.offsetWidth;
+      badge.classList.add('xp-pop');
+      setTimeout(() => badge.classList.remove('xp-pop'), 400);
+    }
+  } else {
+    D.xpDisplay.textContent = target;
+  }
+  let level = 1, cumulative = 0;
+  for (let i = 0; i < XP_LEVELS.length; i++) {
+    if (State.xp >= cumulative + XP_LEVELS[i]) {
+      cumulative += XP_LEVELS[i]; level = i + 2;
+    } else {
+      const pct = ((State.xp - cumulative) / XP_LEVELS[i]) * 100;
+      if (D.xpProgress)   D.xpProgress.style.width  = `${Math.min(pct, 100)}%`;
+      if (D.levelDisplay) D.levelDisplay.textContent = level;
+      if (D.xpToNext)     D.xpToNext.textContent     = XP_LEVELS[i] - (State.xp - cumulative);
+      return;
+    }
+  }
+  if (D.xpProgress)   D.xpProgress.style.width  = '100%';
+  if (D.levelDisplay) D.levelDisplay.textContent = level;
+  if (D.xpToNext)     D.xpToNext.textContent     = 0;
+}
+
+function updateStreakUI() {
+  if (D.streakDisplay) D.streakDisplay.textContent = State.streak || 0;
+}
+
+function animateCounter(el, from, to, duration) {
+  const start = performance.now();
+  const update = ts => {
+    const t = Math.min((ts - start) / duration, 1);
+    el.textContent = Math.round(from + (to - from) * (1 - Math.pow(1 - t, 3)));
+    if (t < 1) requestAnimationFrame(update);
+  };
+  requestAnimationFrame(update);
+}
+
+function checkLevelUp() {
+  let level = 1, cumulative = 0;
+  for (let i = 0; i < XP_LEVELS.length; i++) {
+    if (State.xp >= cumulative + XP_LEVELS[i]) { cumulative += XP_LEVELS[i]; level = i + 2; }
+    else break;
+  }
+  if (level > State.lastLevel) {
+    State.lastLevel = level; saveStorage();
+    showToast(`🎉 Level ${level} Unlocked!`, '🎊');
+    launchConfetti();
+  }
+}
+
+const BADGES = [
+  { id: 'first_video', icon: '🎬', name: 'First Watch',         condition: s => s.videosWatched >= 1 },
+  { id: 'ten_videos',  icon: '🔥', name: 'On Fire — 10 Videos', condition: s => s.videosWatched >= 10 },
+  { id: 'streak3',     icon: '⚡', name: '3-Day Streak',        condition: s => s.streak >= 3 },
+  { id: 'xp100',       icon: '💫', name: 'Century Club',        condition: s => s.xp >= 100 },
+  { id: 'xp500',       icon: '🏆', name: 'Scholar — 500 XP',    condition: s => s.xp >= 500 },
+];
+
+function checkBadges() {
+  BADGES.forEach(badge => {
+    if (!State.badges.includes(badge.id) && badge.condition(State)) {
+      State.badges.push(badge.id);
+      saveStorage();
+      showBadge(badge);
+    }
+  });
+}
+
+function showBadge(badge) {
+  if (!D.badgePopup) return;
+  D.badgeIcon.textContent = badge.icon;
+  D.badgeName.textContent = badge.name;
+  D.badgePopup.classList.remove('hidden');
+  launchConfetti();
+}
+
+function launchConfetti() {
+  const canvas = $('confetti-canvas');
+  if (!canvas) return;
+  canvas.width = window.innerWidth;
+  canvas.height = window.innerHeight;
+  const ctx = canvas.getContext('2d');
+  const colors = ['#7c9cff','#a78bfa','#4ade80','#fbbf24','#f87171','#38bdf8'];
+  const particles = Array.from({ length: 100 }, () => ({
+    x: Math.random() * canvas.width,
+    y: Math.random() * canvas.height - canvas.height,
+    w: Math.random() * 10 + 4, h: Math.random() * 5 + 2,
+    color: colors[Math.floor(Math.random() * colors.length)],
+    rot: Math.random() * 360,
+    vx: (Math.random() - 0.5) * 4, vy: Math.random() * 4 + 2, vr: (Math.random() - 0.5) * 6,
+  }));
+  let frame;
+  const animate = () => {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    let alive = false;
+    particles.forEach(p => {
+      p.x += p.vx; p.y += p.vy; p.rot += p.vr;
+      if (p.y < canvas.height) alive = true;
+      ctx.save(); ctx.translate(p.x, p.y); ctx.rotate(p.rot * Math.PI / 180);
+      ctx.fillStyle = p.color; ctx.fillRect(-p.w/2, -p.h/2, p.w, p.h);
+      ctx.restore();
+    });
+    if (alive) frame = requestAnimationFrame(animate);
+    else ctx.clearRect(0, 0, canvas.width, canvas.height);
+  };
+  cancelAnimationFrame(frame);
+  animate();
+}
+
+// ── SUMMARY PANEL ──
+function updateSummaryPanel(video) {
+  if (D.summaryText)  D.summaryText.textContent = video.summary  || '—';
+  if (D.takeawayText) D.takeawayText.textContent = video.takeaway || '—';
+  if (D.keywordsWrap) {
+    D.keywordsWrap.innerHTML = (video.keywords || [])
+      .map(k => `<span class="keyword-chip">${escapeHtml(k)}</span>`).join('');
+  }
+}
+
+// ── FOCUS MODE ──
+function toggleFocusMode() {
+  State.focusModeOn = !State.focusModeOn;
+  document.body.classList.toggle('focus-mode', State.focusModeOn);
+  D.focusModeBtn.textContent = State.focusModeOn ? '✕ Exit Focus' : '⚡ Focus Mode';
+  if (D.pomodoroWrap) D.pomodoroWrap.classList.toggle('hidden', !State.focusModeOn);
+  showToast(State.focusModeOn ? 'Focus Mode ON 🎯' : 'Focus Mode OFF', '⚡');
+}
+
+// ── POMODORO ──
+const POMO_CIRCUMFERENCE = 2 * Math.PI * 54;
+let pomodoroInterval = null;
+
+function togglePomodoro() {
+  if (State.pomodoroActive) {
+    clearInterval(pomodoroInterval);
+    State.pomodoroActive = false;
+    if (D.pomoToggle) D.pomoToggle.textContent = '▶ Start';
+  } else {
+    State.pomodoroActive = true;
+    if (D.pomoToggle) D.pomoToggle.textContent = '⏸ Pause';
+    pomodoroInterval = setInterval(tickPomodoro, 1000);
+  }
+}
+
+function tickPomodoro() {
+  if (State.pomodoroSeconds <= 0) {
+    State.pomodoroIsBreak = !State.pomodoroIsBreak;
+    State.pomodoroSeconds = State.pomodoroIsBreak ? 5 * 60 : 25 * 60;
+    if (D.pomoLabel) D.pomoLabel.textContent = State.pomodoroIsBreak ? 'BREAK' : 'FOCUS';
+    showToast(State.pomodoroIsBreak ? '🧘 Break time! 5 minutes.' : '⚡ Back to focus!', State.pomodoroIsBreak ? '🧘' : '⚡');
+    return;
+  }
+  State.pomodoroSeconds--;
+  const total = State.pomodoroIsBreak ? 5 * 60 : 25 * 60;
+  const progress = State.pomodoroSeconds / total;
+  if (D.pomoCircle) D.pomoCircle.style.strokeDashoffset = POMO_CIRCUMFERENCE * (1 - progress);
+  if (D.pomoTime) {
+    const m = Math.floor(State.pomodoroSeconds / 60).toString().padStart(2, '0');
+    const s = (State.pomodoroSeconds % 60).toString().padStart(2, '0');
+    D.pomoTime.textContent = `${m}:${s}`;
+  }
+}
+
+// ── BREATHING ──
+let breathingInterval = null;
+function openBreathing() {
+  if (!D.breathingOverlay) return;
+  D.breathingOverlay.classList.remove('hidden');
+  let seconds = 30;
+  if (D.breathingTimer) D.breathingTimer.textContent = seconds;
+  clearInterval(breathingInterval);
+  breathingInterval = setInterval(() => {
+    seconds--;
+    if (D.breathingTimer) D.breathingTimer.textContent = seconds;
+    if (seconds <= 0) closeBreathing();
+  }, 1000);
+}
+function closeBreathing() {
+  clearInterval(breathingInterval);
+  if (D.breathingOverlay) D.breathingOverlay.classList.add('hidden');
+}
+
+// ── FOCUS TIMER ──
+function startFocusTimer() {
+  setInterval(() => {
+    State.focusSeconds++;
+    if (D.statFocus) D.statFocus.textContent = `${Math.floor(State.focusSeconds / 60)}m`;
+  }, 1000);
+}
+
+// ── FLASHCARD ──
+let flashcardQueue = [], flashcardIndex = 0;
+function showFlashcard(fc) {
+  if (!fc || !D.flashcardPopup) return;
+  flashcardQueue = [fc, ...DEMO_VIDEOS.map(v => v.flashcard).filter(f => f !== fc)];
+  flashcardIndex = 0;
+  renderFlashcard(flashcardQueue[0]);
+  D.flashcardPopup.classList.remove('hidden');
+}
+function renderFlashcard(fc) {
+  if (!fc || !D.flashcard) return;
+  D.flashcard.classList.remove('flipped');
+  if (D.fcFront) D.fcFront.textContent = fc.q;
+  if (D.fcBack)  D.fcBack.textContent  = fc.a;
+}
+function advanceFlashcard() {
+  flashcardIndex = (flashcardIndex + 1) % flashcardQueue.length;
+  renderFlashcard(flashcardQueue[flashcardIndex]);
+}
+
+// ── VOICE COMMANDS ──
+function initVoiceCommands() {
+  const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if (!SR) return;
+  let rec;
+  try { rec = new SR(); } catch(e) { return; }
+  rec.continuous = true;
+  rec.lang = 'en-US';
+  rec.interimResults = false;
+  rec.onresult = event => {
+    const text = event.results[event.results.length - 1][0].transcript.toLowerCase().trim();
+    handleVoiceCommand(text);
+  };
+  rec.onend = () => { try { rec.start(); } catch(e) {} };
+  rec.onerror = () => {};
+  try {
+    rec.start();
+    if (D.voiceIndicator && D.voiceCmdText) {
+      D.voiceIndicator.classList.remove('hidden');
+      D.voiceCmdText.textContent = '🎙 Voice Commands Active';
+      setTimeout(() => D.voiceIndicator.classList.add('hidden'), 3000);
+    }
+  } catch(e) {}
+}
+
+function handleVoiceCommand(text) {
+  const commands = [
+    { match: ['next video','next reel','skip'], action: () => { D.reelContainer.scrollBy({ top: D.reelContainer.clientHeight, behavior: 'smooth' }); showVoiceFeedback('Next video →'); } },
+    { match: ['repeat','replay','again'], action: () => { D.reelContainer.scrollBy({ top: -D.reelContainer.clientHeight, behavior: 'smooth' }); showVoiceFeedback('Replaying ↺'); } },
+    { match: ['focus mode','start focus'], action: () => { if (!State.focusModeOn) toggleFocusMode(); showVoiceFeedback('Focus Mode ON ⚡'); } },
+    { match: ['exit focus','stop focus'], action: () => { if (State.focusModeOn) toggleFocusMode(); showVoiceFeedback('Focus Mode OFF'); } },
+    { match: ['science'], action: () => switchTopic('science') },
+    { match: ['technology','tech'], action: () => switchTopic('technology') },
+    { match: ['education'], action: () => switchTopic('education') },
+    { match: ['productivity'], action: () => switchTopic('productivity') },
+    { match: ['reset','breathe','relax'], action: () => { openBreathing(); showVoiceFeedback('Breathing 🧘'); } },
+  ];
+  for (const c of commands) {
+    if (c.match.some(m => text.includes(m))) { c.action(); return; }
+  }
+}
+
+function showVoiceFeedback(msg) {
+  if (!D.voiceIndicator || !D.voiceCmdText) return;
+  D.voiceIndicator.classList.remove('hidden');
+  D.voiceCmdText.textContent = msg;
+  setTimeout(() => D.voiceIndicator.classList.add('hidden'), 2000);
+}
+
+function switchTopic(topic) {
+  D.topicPills.forEach(p => { p.classList.remove('active'); if (p.dataset.topic === topic) p.classList.add('active'); });
+  State.currentTopic = topic;
+  loadReels(true);
+  showVoiceFeedback(`Switched to ${topic} 🔍`);
+}
+
+// ── TOAST ──
+function showToast(message, icon = '✦') {
+  const toast = document.createElement('div');
+  toast.style.cssText = [
+    'position:fixed','bottom:90px','left:50%','transform:translateX(-50%)',
+    'background:var(--card)','border:1px solid var(--border)','border-radius:50px',
+    'padding:8px 20px','font-size:13px','font-weight:600','z-index:2000',
+    'display:flex','align-items:center','gap:8px',
+    'animation:slideUp 0.3s cubic-bezier(0.34,1.56,0.64,1)',
+    'box-shadow:0 4px 20px rgba(124,156,255,0.25)',
+    "color:var(--text)","font-family:'Sora',sans-serif",'white-space:nowrap','pointer-events:none',
+  ].join(';');
+  toast.innerHTML = `<span>${icon}</span><span>${message}</span>`;
+  document.body.appendChild(toast);
+  setTimeout(() => {
+    toast.style.transition = 'opacity 0.4s';
+    toast.style.opacity = '0';
+    setTimeout(() => toast.remove(), 400);
+  }, 2500);
+}
+
+// ── GENERATORS ──
+function generateKeyPoints(title) {
+  return [
+    `Understanding the core concepts of "${title.split(' ').slice(0, 4).join(' ')}..."`,
+    'Connecting new knowledge to real-world applications',
+    'Identifying practical steps to apply these ideas today',
+  ];
+}
+function generateQuiz(title) {
+  const opts = ['Exploring fundamental theories','Practical applications in daily life','Historical context and development','Future predictions and trends'];
+  return { q: `What is the main focus of "${title.slice(0, 50)}..."?`, opts, answer: Math.floor(Math.random() * 4) };
+}
+</script>
+</body>
+</html>

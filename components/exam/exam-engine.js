@@ -547,7 +547,14 @@ async function finishExam() {
 async function startExamFlow() {
   try {
     ui.startButton.disabled = true;
+    ui.stageIdle.hidden = true;
+    ui.stageResult.hidden = true;
+    ui.stageActive.hidden = false;
+    ui.questionCounter.textContent = `Question 0 of ${EXAM_QUESTIONS.length}`;
+    ui.questionText.textContent = "Initializing exam. Please hold still and keep your face in frame...";
+    ui.selectedAnswer.textContent = "Preparing gesture detection...";
     setStatus("Initializing camera and detection...");
+    setInstruction("Camera access is required to continue.");
 
     await ensureSpeechReady();
     try {
@@ -570,6 +577,8 @@ async function startExamFlow() {
     state.examStarted = false;
     state.blockInput = false;
     ui.startButton.disabled = false;
+    ui.stageIdle.hidden = false;
+    ui.stageActive.hidden = true;
     setStatus(`Unable to start exam: ${error.message || "Unknown error"}`);
     setInstruction("Please allow camera access and reload the page.");
   }

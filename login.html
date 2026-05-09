@@ -457,7 +457,7 @@
                         <option value="blind">Blind</option>
                         <option value="dyslexia">Dyslexia</option>
                         <option value="adhd">ADHD</option>
-                        <option value="physically">Physically handicapped</option>
+                        <option value="physically">Sign Language</option>
                         <option value="parent">parent</option>
                         <option value="exam">exam</option>
                     </select>
@@ -620,6 +620,18 @@
                 }
 
                 switch (disabilityKey) {
+                    case 'adhd': {
+                        const profile = {
+                            role: 'student',
+                            disability: 'adhd',
+                            name,
+                            email,
+                            lastLoginAt: new Date().toISOString()
+                        };
+                        localStorage.setItem('adhdStudentProfile', JSON.stringify(profile));
+                        window.location.assign('adhd-learning.html');
+                        return;
+                    }
                     case 'deaf':
                         window.location.assign('deaf-learning.html');
                         return;
